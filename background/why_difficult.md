@@ -33,7 +33,7 @@ C++学习曲线陡峭，是一种共识。造成这一现象的原因是什么�
 如果是python，除非极其特殊的原因，几乎不会有人写出不同于以下实现的第二种实现：
 
 ```python
-def cat_str(a: str, b: str):
+def concat_str(a: str, b: str):
     return a + b
 ```
 
@@ -43,8 +43,8 @@ def cat_str(a: str, b: str):
 * 函数对外屏蔽实现原则。用多少申请多少，由函数内部分配并返回，调用者释放。
 
 ```c
-void cat_str(char* a, char* b, char* dst, int n);
-char* cat_str(char* a, char* b);
+void concat_str(char* a, char* b, char* dst, int n);
+char* concat_str(char* a, char* b);
 ```
 
 两者都是合法的，但是通常大家习惯采用第一种，即由调用者控制内存的申请，以尽量规避内存归属不清导致的泄露。初学者并不容易在没有经验的时候把握到这一点。
@@ -54,7 +54,7 @@ char* cat_str(char* a, char* b);
 * 返回值的复制能否避免？这牵涉到了对NRV优化（Named Return Value），甚至左值右值的了解。
 
 ```c++
-std::string cat_str(const std::string& a, const std::string& b)
+std::string concat_str(const std::string& a, const std::string& b)
 {
     std::string res = a + b;
     return res;
