@@ -22,14 +22,14 @@
 ```c
 typedef struct
 {
-    float x;
-    float y;
+    double x;
+    double y;
 } Point;
 
-float calc_distance(Point p1, Point p2)
+double calc_distance(Point p1, Point p2)
 {
-    float delta_x = p1.x - p2.x;
-    float delta_y = p1.y - p2.y;
+    double delta_x = p1.x - p2.x;
+    double delta_y = p1.y - p2.y;
     return sqrt(delta_x * delta_x + delta_y * delta_y);
 }
 
@@ -37,7 +37,7 @@ int main()
 {
     Point p1 = { .x = 0.0, .y = 1.0 };
     Point p2 = { .x = 2.0, .y = 3.0 };
-    float distance = calc_distance(p1, p2);
+    double distance = calc_distance(p1, p2);
     printf("%f", distance);
     return 0;
 }
@@ -49,7 +49,7 @@ int main()
 
 很多现代编程语言都支持OOP，应用非常普遍。其中C++不仅支持OOP还支持过程式，而Java/.Net等语言从最顶层看就仅支持OOP一种编程范式，即使是作为程序入口的main函数也必须被包含在一个类中。
 
-```c#
+```csharp
 public class Point
 {
     public Point(double x, double y)
