@@ -1,2 +1,2 @@
 # cppnotes
-A short notes on learning C++
+A short note on learning C++

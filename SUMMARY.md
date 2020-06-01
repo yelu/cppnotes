@@ -7,7 +7,7 @@
 * [学习C++的困难来自何处](background/why_difficult.md)
 * [编程范式](background/paradigm.md)
 * [编译和链接](background/unk.md)
-* [21世纪了，不能不用C++吗](background/why_cpp.md)
+* [21世纪了，能不用C++吗](background/why_cpp.md)
 
 ## 内存
 
