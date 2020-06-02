@@ -49,9 +49,10 @@ char* concat_str(char* a, char* b);
 
 两者都是合法的，但是通常大家习惯采用第一种，即由调用者控制内存的申请，以尽量规避内存归属不清导致的泄露。初学者并不容易在没有经验的时候把握到这一点。
 
-回到习惯面向对象的开发者，如果不是性能要求特别苛刻，使用C++的std::string也能简单直观地实现功能，但这其中还是有一些选择需要面对：
-* 习惯性使用的语法，例如const、引用都为什么要用？
-* 返回值的复制能否避免？这牵涉到了对NRV优化（Named Return Value），甚至左值右值的了解。
+回到习惯C++ std::string类的开发者，如果不是性能要求特别苛刻，使用std::string也能简单直观地实现功能，但这其中还是有一些选择需要面对：
+
+* 常见的语法，例如const、引用，用还是不用？
+* 该返回std::string吗？返回值的复制能避免吗？这牵涉到对NRV优化（Named Return Value），以及左值右值的了解。
 
 ```c++
 std::string concat_str(const std::string& a, const std::string& b)
