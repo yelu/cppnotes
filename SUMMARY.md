@@ -6,15 +6,19 @@
 
 * [C++难在哪](background/why_difficult.md)
 * [编程范式](background/paradigm.md)
+* [能不用C++吗](background/why_cpp.md)
+
+## 编译和链接
+
 * [编译和链接](background/unk.md)
-* [21世纪了，能不用C++吗](background/why_cpp.md)
 
-## 内存
+## 对象模型
 
-* [C++对象模型](memory/unk.md)
+* [什么是对象模型](model/introduction.md)
+
+## 内存管理
+
 * [堆和栈](memory/unk.md)
 * [错误处理：异常和RAII](memory/unk.md)
-
-## 并发
 
 ## 模板
