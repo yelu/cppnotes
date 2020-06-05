@@ -1,6 +1,6 @@
 # Table of contents
 
-* [关于此系列文章](README.md)
+## [关于此系列文章](README.md)
 
 ## 预备知识
 
@@ -9,8 +9,6 @@
 * [能不用C++吗](background/why_cpp.md)
 
 ## 编译和链接
-
-* [编译和链接](background/unk.md)
 
 ## 对象模型
 
