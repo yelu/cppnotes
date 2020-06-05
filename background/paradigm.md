@@ -78,7 +78,7 @@ public class Program
 
 函数式编程出现于上世纪五十年代，在面向数学运算的语言中运用较多。它的特点是视函数为“第一等公民（First Class）”，和普通数据变量拥有同等地位。
 
-极少有完全函数式的语言在工业界广泛应用，函数式范式更多时候是通过lambda函数被非函数式语言局部运用的。限于篇幅，本节仅挑选[高阶函数（Higher Order Function）](http://www.shido.info/lisp/scheme8_e.html)这一个被很多非函数式的语言广泛吸收的特性。
+极少有完全函数式的语言在工业界广泛应用，函数范式更多时候是通过lambda函数被非函数式语言局部运用的。限于篇幅，本节仅挑选[高阶函数（Higher Order Function）](http://www.shido.info/lisp/scheme8_e.html)这一个被很多非函数式语言广泛吸收的函数式特性。
 
 所谓高阶函数，即接收函数作为参数的函数。
 
@@ -91,7 +91,7 @@ public class Program
 
 高阶函数可以用来分离可变部分和不可变部分，从而提高代码的模块化程度和复用性。上面的例子中，排序函数关注排序算法本身，不关注比较函数如何实现，由用户提供具体的比较逻辑定制出不同的实现。
 
-这一特性近来被大多数OOP语言吸收了，例如C++中的std::transform就是例子之一。
+这一特性近来被大多数OOP语言吸收了，例如C++中的[std::transform](https://en.cppreference.com/w/cpp/algorithm/transform)就是例子之一。
 
 ```c++
 // 将字符原地转为大写
