@@ -1,6 +1,4 @@
-# Table of contents
-
-A short note on learning C++
+# Notes on learning C++
 
 ## 预备知识
 
@@ -9,8 +7,6 @@ A short note on learning C++
 * [能不用C++吗](background/why_cpp.md)
 
 ## 编译和链接
-
-* [编译和链接](background/unk.md)
 
 ## 对象模型
 

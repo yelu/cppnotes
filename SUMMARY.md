@@ -1,6 +1,6 @@
 # Table of contents
 
-## [关于此系列文章](README.md)
+* [关于此系列文章](README.md)
 
 ## 预备知识
 
