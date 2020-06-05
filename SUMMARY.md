@@ -17,6 +17,6 @@
 ## 内存管理
 
 * [堆和栈](memory/unk.md)
-* [错误处理：异常和RAII](memory/unk.md)
+* [异常和RAII](memory/exception_raii.md)
 
 ## 模板
