@@ -72,7 +72,7 @@ RAII(resource acquisition is initialization)是在1984–89年，伴随着C++中
 
 对于没有GC的语言，RAII是异常错误处理不可缺少的一环。否则，异常对程序错误处理逻辑的简化是没有意义的：不显式处理错误即意味着资源的泄露。
 
-RAII在C++异常机制中是通过异常栈展开（stack unwinding）来实现的。控制从throw语句移至可处理引发类型的第一个catch 语句。随后，堆栈的展开过程将开始。其中重要的一步是：对从**与catch匹配的try块的开始**到**异常的引发点**之间完全构造（但尚未析构）的所有对象的进行析构。析构函数会在以下两种情况下被调用保证了资源的安全释放：
+RAII在C++异常机制中是通过异常栈展开（Stack Unwinding）来实现的。控制从throw语句移至可处理异常的catch语句。随后，堆栈的展开过程开始。其中重要的一步是：对try语句块开始到异常引发点之间完全构造（但尚未析构）的所有对象的进行析构。析构函数会在以下两种情况下被调用保证了资源的安全释放：
 
 * 对象离开作用域->one true path上资源的释放。
 * 异常栈展开->异常发生时资源的释放。
@@ -114,21 +114,21 @@ void RAII () {
 
 ```cpp
 // case 3: 文件句柄
-class file_scope_guard_t {
+class ScopeGuard {
 public:
-    explicit file_scope_guard_t(FILE * f):_f(f) {}
+    explicit ScopeGuard(FILE * f):_f(f) {}
     ~scope_guard_t() { if(_f != NULL) fclose(_f); }
 
 private:
     FILE * _f;
     // noncopyable
-    file_scope_guard_t(file_scope_guard_t const&);
-    file_scope_guard_t& operator=(file_scope_guard_t const&);
+    ScopeGuard(ScopeGuard const&);
+    ScopeGuard& operator=(ScopeGuard const&);
 };
 
 int main(){
     File* f = fopen("a.txt", "r");
-    file_scope_guard_t guard(f);
+    ScopeGuard guard(f);
 }
 ```
 

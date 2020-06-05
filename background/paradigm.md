@@ -2,7 +2,7 @@
 
 编程范式（Programming Paradigm）是指导程序构建的某种“思想”或者“方法论”，它从根本上影响了代码的结构和风格。
 
-直到今天，编程范式已经发展出一个[很多元的体系](https://en.wikipedia.org/wiki/Programming_paradigm)。熟知所有语言和范式既不太可能，也不见得需要。在现实中，不是每一种范式被应用的频率都一样高，本节只讨论三种最常用的范式：
+到今天，编程范式已经发展出一个[很多元的体系](https://en.wikipedia.org/wiki/Programming_paradigm)。熟知所有语言和范式既不太可能，也不见得需要。在现实中，不是每一种范式被应用的频率都一样高，本节只讨论三种最常用的范式：
 
 * 过程式，Procedural Programming
 * 面向对象，Object-oriented Programming(OOP)
@@ -76,7 +76,9 @@ public class Program
 
 ## 函数式
 
-函数式编程出现于上世纪五十年代，在面向数学运算的语言中运用较多。它的特点是视函数为“第一等公民（First Class）”，和普通数据变量拥有同等地位。极少有纯函数式的语言在工业界广泛应用，函数式编程的核心概念也就没有被开发者普遍所熟知。限于篇幅，本节仅挑选[高阶函数（Higher Order Function）](http://www.shido.info/lisp/scheme8_e.html)这一个被很多非函数式的语言广泛吸收的特性。
+函数式编程出现于上世纪五十年代，在面向数学运算的语言中运用较多。它的特点是视函数为“第一等公民（First Class）”，和普通数据变量拥有同等地位。
+
+极少有完全函数式的语言在工业界广泛应用，函数式范式更多时候是通过lambda函数被非函数式语言局部运用的。限于篇幅，本节仅挑选[高阶函数（Higher Order Function）](http://www.shido.info/lisp/scheme8_e.html)这一个被很多非函数式的语言广泛吸收的特性。
 
 所谓高阶函数，即接收函数作为参数的函数。
 
