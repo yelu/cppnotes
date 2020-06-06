@@ -1,10 +1,14 @@
 # Notes on learning C++
 
-## 预备知识
+## 导言
 
-* [C++难在哪](background/why_difficult.md)
-* [编程范式](background/paradigm.md)
-* [能不用C++吗](background/why_cpp.md)
+* [C++难在哪](introduction/why_difficult.md)
+* [能不用C++吗](introduction/why_cpp.md)
+
+## 基础知识
+
+* [编程范式](basic/paradigm.md)
+* [指针](basic/pointer.md)
 
 ## 编译和链接
 
@@ -15,6 +19,6 @@
 ## 内存管理
 
 * [堆和栈](memory/unk.md)
-* [错误处理：异常和RAII](memory/unk.md)
+* [异常和RAII](memory/exception_raii.md)
 
 ## 模板
