@@ -17,7 +17,7 @@
 ## 对象模型
 
 * [什么是对象模型](model/introduction.md)
-* [类与对象模型]()
+* [类与对象模型](model/encapsulation.md)
 * [继承与对象模型]()
 * [多态与对象模型]()
 
