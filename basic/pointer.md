@@ -72,13 +72,13 @@ int *(*p(int))[3];
 // not recommended
 int* (*p)[3];
 // good
-typedef int* INT_ARRAY[3];
-INT_ARRAY* p;
+typedef int* INT_POINTER_ARRAY[3];
+INT_POINTER_ARRAY* p;
 
 // not recommended
 int *(*p(int))[3];
 // good
-typedef int* INT_ARRAY[3];
+typedef int INT_ARRAY[3];
 typedef INT_ARRAY* (*FUNCTION) (int);
 FUNCTION p;
 ```
