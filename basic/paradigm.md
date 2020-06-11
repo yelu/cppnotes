@@ -1,12 +1,43 @@
 # 编程范式
 
-编程范式（Programming Paradigm）是指导程序构建的某种“思想”或者“方法论”，它从根本上影响了代码的结构和风格。
+编程范式（Programming Paradigm）是指导程序构建的某种“思想”或者“方法论”，它从根本上影响了代码的结构和风格。通常，编程范式被分为两个大类：
 
-到今天，编程范式已经发展出一个[很多元的体系](https://en.wikipedia.org/wiki/Programming_paradigm)。熟知所有语言和范式既不太可能，也不见得需要。在现实中，不是每一种范式被应用的频率都一样高，本节只讨论三种最常用的范式：
+* 命令式（Imperative）
+* 声明式（Declarative）
 
-* 过程式，Procedural Programming
-* 面向对象，Object-oriented Programming(OOP)
-* 函数式，Functional Programming(FP)
+命令式是很常见的编程方式，程序的数据状态随着代码一行行执行改变，代码定义了怎样（How）做某件事情的全部操作步骤。
+
+```python
+items = [1, 2, 3, 4, 5]
+squared = []
+for i in items:
+    squared.append(i**2)
+```
+
+而声明式则不同，它通常只声明要做到什么（What），并不关心如何做到。
+
+```python
+# 声明需要把列表每个元素平方，不关心遍历循环的实现细节。
+items = [1, 2, 3, 4, 5]
+squared = list(map(lambda x: x**2, items))
+```
+
+```sql
+# 声明需要把国籍为中国的用户删选出来，并不关心如果筛选。
+SELECT * FROM Users WHERE Country='PRC';
+```
+
+声明式或是命令式的这种`How vs What`的不同都是从语言对外提供的用法上来看的。声明式看起来更符合直觉、更简单，但是所有**声明式的语句都需要由底层命令式去具体实现**。这也体现了二者之间不可分割的关系。
+
+根据Van Roy的[整理](https://www.info.ucl.ac.be/~pvr/VanRoyChapter.pdf)，编程范式有一个[丰富多元的体系](https://en.wikipedia.org/wiki/Programming_paradigm)。语言和范式之间是多对多的关系，一门语言可以支持多种编程范式。
+
+![编程范式分类](paradigms.png)
+
+依据各个范式在工业界使用的频率，本节只讨论三种最常用的范式：
+
+* 过程式(Procedural Programming)，属于命令式大类。
+* 面向对象(Object-oriented Programming, OOP)，属于命令式大类。
+* 函数式(Functional Programming, FP)，属于声明式大类。
 
 ## 过程式
 
@@ -76,9 +107,9 @@ public class Program
 
 ## 函数式
 
-函数式编程出现于上世纪五十年代，在面向数学运算的语言中运用较多。它的特点是视函数为“第一等公民（First Class）”，和普通数据变量拥有同等地位。
+函数式编程出现于上世纪五十年代，属于一种声明式范式。它的特点是视函数为“第一等公民（First Class）”，和普通数据变量拥有同等地位。
 
-极少有完全函数式的语言在工业界广泛应用，函数范式更多时候是通过lambda函数被非函数式语言局部运用的。限于篇幅，本节仅挑选[高阶函数（Higher Order Function）](http://www.shido.info/lisp/scheme8_e.html)这一个被很多非函数式语言广泛吸收的函数式特性。
+极少有完全函数式的语言在工业界广泛应用，函数范式更多时候是通过lambda函数在非函数式语言中被局部运用。限于篇幅，本节仅挑选[高阶函数（Higher Order Function）](http://www.shido.info/lisp/scheme8_e.html)这一个被很多非函数式语言广泛吸收的函数式特性。
 
 所谓高阶函数，即接收函数作为参数的函数。
 
@@ -161,4 +192,4 @@ int main()
 最后，在了解了一些编程范式的知识之后，回顾一些重要的事实：
 
 * 编程语言的背后有一定的理论体系，每门语言都涵盖了一种或者多种编程范式。
-* 构建程序的方式是多种多样的，每一门语言支持的范式只是众多范式中的一小部分。
+* 灵活运用编程范式背后的思想才是最重要的。

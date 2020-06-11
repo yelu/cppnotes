@@ -14,6 +14,8 @@
 
 ## 编译和链接
 
+* [源代码到可执行程序](compile_link/cpp_to_exe.md)
+
 ## 对象模型
 
 * [什么是对象模型](model/introduction.md)
