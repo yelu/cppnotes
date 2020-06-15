@@ -1,6 +1,6 @@
 # 编程范式
 
-编程范式（Programming Paradigm）这一概念最早出现在Robert W. Floyd在1978年的演讲“The Paradigms of Programming”中，后来逐渐被用来划分构建程序的不同方式。每种范式代表着一种“思想”或者“方法论”，对代码的结构和风格产生影响。
+编程范式（Programming Paradigm）这一概念最早可追溯到Robert W. Floyd在1978年所作的演讲“The Paradigms of Programming”，后来逐渐被用来划分构建程序的不同方式。每种范式代表着一种“思想”或者“方法论”，对代码的结构和风格产生影响。
 
 ## 过程式
 
