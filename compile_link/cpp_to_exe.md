@@ -1,16 +1,15 @@
 # 从源代码到可执行程序
 
-很多人的C++之旅或许是从一个hello world程序和一个IDE开始的。通过点击CLion或者Visual Studio的一些按钮很快能在屏幕打印出“hello world”。实际上，在背后，IDE需要调用具体的编译器命令行程序，在Linux上，很可能是g++，而在Windows上是Visual Studio提供的c1。
+很多人的C++之旅或许是从hello world程序和IDE开始的。通过点击CLion或者Visual Studio的一些按钮很快能在屏幕打印出“hello world”字样。实际上，在背后，IDE需要调用具体的编译器命令行程序，在Linux上，可能是g++，在Windows上是Visual Studio提供的c1。
 
 ```cpp
-// hello_world.cpp
-
 #include <iostream>
 using namespace std;
 
 int main()
 {
     cout << "hello world" << endl;
+    return 0;
 }
 ```
 
@@ -22,7 +21,7 @@ g++ -c hello_world.cpp
 cl /EHsc hello_world.cpp
 ```
 
-虽然以上命令一次性就产出了最终的可执行文件，实际上内部涉及了四个处理步骤：预处理、 编译、汇编和链接。g++内部通过依次调用一组独立的工具来输出最终结果。前三步中，编译器是对每个源文件(.cpp/.cc)独立进行的，每一个源文件就是一个处理单元。最后一步，链接器会统筹所有目标文件，解决跨源文件的符号依赖。
+虽然以上命令一次性就产出了最终的可执行文件，实际上内部涉及了四个处理步骤：预处理、 编译、汇编和链接。g++/c1通过依次调用一组独立的工具来输出最终结果。前三步中，编译器是对每个源文件(.cpp/.cc)独立进行的，每一个源文件就是一个处理单元。最后一步，链接器会统筹所有目标文件，解决跨源文件的符号依赖。
 
 拆解这些步骤有利于理解编译过程中可能面临的错误，也有利于写出更加高效的C和C++代码。
 
