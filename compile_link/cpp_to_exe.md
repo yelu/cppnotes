@@ -1,13 +1,12 @@
 # 从源代码到可执行程序
 
-很多人的C++之旅或许是从hello world程序和IDE开始的。通过点击CLion或者Visual Studio的一些按钮很快能在屏幕打印出“hello world”字样。实际上，在背后，IDE需要调用具体的编译器命令行程序，在Linux上，可能是g++，在Windows上是Visual Studio提供的c1。
+很多人的C++之旅或许是从hello world程序和IDE开始的。通过点击CLion或者Visual Studio的一些按钮很快能在屏幕打印出“hello world”字样。实际上，在背后，IDE需要调用具体的编译器命令行程序，在Linux上，可能是g++，在Windows上则是Visual Studio提供的c1。
 
 ```cpp
 #include <iostream>
 using namespace std;
 
-int main()
-{
+int main() {
     cout << "hello world" << endl;
     return 0;
 }
@@ -97,7 +96,7 @@ int main(int argc, char* argv[]) {
 
 ## 编译(Compile)
 
-接下来，编译器cc1plus将中间文件`hello_world.i`编译成汇编代码[hello_world.s](hello_world.s)。这一步是真正的词法、语法分析等发生的地方。
+接下来，编译器cc1plus将中间文件`hello_world.i`编译成汇编代码[hello_world.s](hello_world.s)。这一步是真正的词法、语法分析发生的地方。
 
 ```bash
 /usr/lib/gcc/x86_64-linux-gnu/7/cc1plus hello_world.ii -Og -o hello_world.s
@@ -115,7 +114,7 @@ g++ -c hello_world.cpp
 
 ## 链接(Link)
 
-链接器需要解决printf等没有定义在`hello_world.o`中的外部符号，这些符号定义在预先编译好的C兼容库中，一般随着编译器一起被安装，通过命令行参数`-lc`引入。缺少这个链接库，便会导致一个链接错误。
+链接器需要解决printf等没有定义在`hello_world.o`中的外部符号，这些符号定义在预先编译好的C兼容库中，一般随着编译器一起被安装，可通过命令行参数`-lc`引入。缺少这个链接库，便会导致一个链接错误。
 
 ```bash
 /usr/lib/gcc/x86_64-linux-gnu/7/collect2 \
