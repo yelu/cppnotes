@@ -1,0 +1,127 @@
+# 继承与对象模型
+
+## 单一继承的数据布局
+
+在单一继承场景下，C++标准只要求派生类中基类部分(subobject)必须和单独的基类对象时保持一致的内存布局。
+
+这样规定的好处或者原因是什么呢？答案是，基类和派生类对象之间的互操作性。派生类本身是对基类的扩展，应该可以通过派生类访问属于基类的成员函数。而在调用基类的函数时，这些函数不可能知道操作的对象是一个单独的基类对象，还是隶属于某个派生类对象的一部分。因此，两种情况下，基类的内存布局必须保持一致。
+
+```cpp
+class A
+{
+public:
+    void print_a();
+private:
+    char x;
+}
+
+class B: public A
+{
+public:
+    void print_b();
+private:
+    char y;
+};
+```
+
+```cpp
+
+```
+
+“继承与否，内存布局一致”，在一定程度上会导致对象占用的内存有所膨胀。出于内存访问效率的考虑，编译器倾向于让每个对象都开始于某个字节数（例如，4字节或者8字节）的整数倍上，称为padding。
+
+假设编译器采用4字节padding，A由于只有一个char类型member，会被补齐3个字节，最终A类型对象的size为4。B继承自A，添加了一个char类型的y，但y不可以紧邻着x放置，因为这破坏了标准规定的原则。最终B再次被padding，size为8。而B如果没有继承自A，x，y都定义在B中，B的size则是4。
+
+文初的要求还可以衍生出以下解读：基类部分在派生类中的位置是自由的。但是，一般编译器会把基类部分放在头部。这体现了C++标准和编译器实现之间常有的一种默契：标准之外虽然有一些自由，但是选择有优劣之分，编译器最终大多会统一到一种共识上去。
+
+
+## 多继承的数据布局
+
+如果编译器选择将基类部分至于派生类开头，单一继承情况下，基类和派生类之间的转换是非常自然的：它们都开始于同一个内存位置，差别只在于派生类要容纳自己多出来的部分，要更大一些。而多继承的时候，情况就完全不同了，问题要复杂得多。
+
+C++是为数不多的真正有胆量支持多继承的语言。实际上，如果让C++再选一次，多继承即使不被当场否定，至少也需要继续商讨，而不是被理所当然地接受。多继承带来了太多的额外复杂性，以至于盖过了它所带来的收益。Java/C#等后来语言都选择不支持多继承，转而代以接口(Interface)这个概念。
+
+多继承带来的第一个麻烦是，编译器需要根据情况，适当调整this指针的位置。
+
+```cpp
+class A
+{
+public:
+    void print_a();
+private:
+    char x;
+}
+
+class B
+{
+public:
+    void print_b();
+private:
+    char y;
+};
+
+class AB: public A, public B
+{
+public:
+    void print_ab();
+private:
+    char xy;
+};
+```
+
+C++标准并未规定，A和B在AB的内存布局中的先后次序。假设按照继承申明次序，A在前B在后，在AB类型的对象上调用B类的函数时，编译器要适当调整this指针的位置。
+
+```cpp
+AB* ab = new AB();
+ab->print_b();
+
+// without shift, wrong B.
+B_print_b(ab);
+
+// compiler shift pointer ab with an offset.
+B_print_b(ab + sizeof(A));
+```
+
+多继承带来的另外一个麻烦之处是，菱形继承。如果在继承路径上同一个基类被继承多次，则需要去重，把它们合并为一个。C++解决这个问题的方法是虚继承（Virtual Inheritance）。
+
+```cpp
+class A
+{
+public:
+    void print_a();
+private:
+    char x;
+}
+
+class B: public virtual A
+{
+public:
+    void print_b();
+private:
+    char y;
+};
+
+class C: public virtual A
+{
+public:
+    void print_c();
+private:
+    char z;
+};
+
+class BC: public B, public C
+{
+public:
+    void print_ab();
+private:
+    char yz;
+};
+```
+
+虚继承随之带来的问题是，继承链条上的每个类型的内存排布都可能不同。也就是说，BC中A的偏移位置和B或C中A的偏移位置都不相同。这需要用另一个东西去实现：虚基类偏移量表（Virtual Base Classes Table），用以记录每个虚基类类型距离起始位置的offset。
+
+如果B是一个独立的对象，访问基类A的成员时，this指针需要偏移8字节（32位机器，4字节对齐）。而如果B是从BC类型的对象中得来的，访问A类型成员时，this指针则需要偏移20个字节。
+
+![Virtual Inheritance and Memory Layouts](inherit.png)
+
+虚继承带来了额外的指针访问开销，加之其复杂性，更为明智的选择显然是通过合理调整继承结构，避免多继承的出现。
