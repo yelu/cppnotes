@@ -20,7 +20,7 @@
 
 * [什么是对象模型](model/introduction.md)
 * [类与对象模型](model/encapsulation.md)
-* [继承与对象模型]()
+* [继承与对象模型](model/inheritance.md)
 * [多态与对象模型]()
 
 ## 内存管理
