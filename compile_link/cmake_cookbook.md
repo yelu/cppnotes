@@ -16,7 +16,7 @@ Kitware的开发人员将这一模式“发扬光大”，做了诸多增强和�
 
 ## 编译工具栈
 
-编译C/C++，说到底，最终还是靠编译器程序外加一长串命令行配置项和开关完成的。根据平台和喜好，可选的编译工具链(Toolset)有很多，例如：
+编译C/C++，说到底，最终还是靠编译器程序外加一长串命令行配置项和开关完成的。根据平台和喜好，可选的编译工具链(Toolchain)有很多，例如：
 * GNU gcc/g++
 * [Microsoft MSVC](https://docs.microsoft.com/en-us/cpp/build/reference/compiling-a-c-cpp-program?view=vs-2019), Windows only
 * [Clang](https://clang.llvm.org/get_started.html)
@@ -47,6 +47,6 @@ clean:
     rm -f $(PROG) $(OBJS)
 ```
 
-CMake这时候的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建工具需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个构建系统的生成器。CMake目前支持几乎市面上所有无论是基于命令行还是IDE的构建系统。
+CMake这时候的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建工具需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需流程的工具**。CMake目前支持几乎市面上所有无论是基于命令行还是IDE的构建系统。
 
 ![Stack of Build Tools](cmake_stack.png)
