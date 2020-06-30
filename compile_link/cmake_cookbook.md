@@ -17,8 +17,8 @@ Kitware的开发人员将这一模式“发扬光大”，做了诸多增强和�
 ## 编译工具栈
 
 编译C/C++，说到底，最终还是靠编译器程序外加一长串命令行配置项和开关完成的。根据平台和喜好，可选的编译工具链(Toolchain)有很多，例如：
-* GNU gcc/g++
-* [Microsoft MSVC](https://docs.microsoft.com/en-us/cpp/build/reference/compiling-a-c-cpp-program?view=vs-2019), Windows only
+* [GNU gcc/g++](https://gcc.gnu.org/)
+* [MSVC](https://docs.microsoft.com/en-us/cpp/build/reference/compiling-a-c-cpp-program?view=vs-2019), Windows only
 * [Clang](https://clang.llvm.org/get_started.html)
 
 ```bash
@@ -26,10 +26,10 @@ g++ main.cpp -I /path/to/include -L /path/tp/lib -l libbencoding -o foo.exe -std
 ```
 
 但是，编译工作通常不是一行命令就能直接搞定的。前前后后难免有一些准备、清理工作和胶水逻辑，这时就需要一个好的构建系统(Build System)来管理整个构建流程。常用的构建系统有：
-* GNU Make
-* Ninja
-* MSBuild
-* Apple Xcode
+* [GNU Make](https://www.gnu.org/software/make/)
+* [Ninja](https://ninja-build.org/)
+* [MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2019)
+* [xcodebuild](https://developer.apple.com/library/archive/technotes/tn2339/_index.html)
 
 有了构建系统，编译的流程就变成了提供对应系统的配置文件，例如Makefile(GNU Make)或者vcproj(MSBuild)文件，再调用编译系统提供的命令，如`make clean; make`等间接完成编译。
 
