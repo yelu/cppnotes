@@ -1,6 +1,6 @@
 # CMake简介
 
-在Linux的世界里，从源码编译、安装工具包是一种很常见的事情。这个过程中，有个[“三部曲”模式](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install)经常被采用：
+在Linux的世界里，从源码编译、安装工具包是件很常见的事情。这个过程中，有个[“三部曲”模式](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install)经常被采用：
 
 ```bash
 ./configure --prefix=/usr/local/bin/
