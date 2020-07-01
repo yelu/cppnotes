@@ -31,7 +31,7 @@
 
 ## 常用设计模式
 
-* [Scope Guard]()
+* [Scope Guard](design_pattern/scope_guard.md)
 * [单例]()
 * [工厂]()
 

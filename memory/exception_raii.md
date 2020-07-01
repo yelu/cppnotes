@@ -79,21 +79,12 @@ C++提供了支持来实现以上的想法，它依靠的是两点重要的设�
 
 ## 异常和RAII
 
-RAII(resource acquisition is initialization)是在1984–89年，伴随C++中异常安全的资源管理机制，由Bjarne Stroustrup提出的。RAII的核心思路是把系统资源和对象的生命周期绑定：
+RAII(resource acquisition is initialization)是在1984–89年，伴随C++中异常安全的资源管理机制，由Bjarne Stroustrup提出的。RAII的核心思路是把系统资源和对象的生命周期绑定。Scope Guard模式就是对RAII的有效利用。
+
 * 对象创建时获取资源（类的构造函数中分配资源）。
 * 对象销毁释放资源（析构函数中释放资源）。
 
-对于没有GC的语言，RAII是异常错误处理不可缺少的一环。否则，异常对程序错误处理逻辑的简化是没有意义的：不显式处理错误即意味着资源的泄露。
-
-RAII在C++异常机制中是通过异常栈展开（Stack Unwinding）来实现的。控制流从throw语句移至可处理异常的catch语句。随后，堆栈的展开过程开始。其中重要的一步是：对try语句块开始到异常引发点之间完全构造（但尚未析构）的所有对象进行析构。析构函数会在以下两种情况下被调用保证了资源的安全释放：
-
-* 对象离开作用域时，one true path上资源的释放。
-* 异常栈展开时，栈上资源的释放。
-
-系统资源有很多种，包括内存、打开的文件或者共享锁。C++通常使用一种叫做Scope Guard的模式来管理资源。提供了gc的语言，针对非托管的系统资源，通常也有类似的设计，例如Python的`with...as...`和C#的`using(...)`。
-
 ```cpp
-// case 1: 堆内存申请
 // DO NOT
 void NoRAII() {
     Object* obj = new Object();
@@ -108,42 +99,12 @@ void RAII() {
 }
 ```
 
-```cpp
-// case 2: 互斥锁
-// mutex to protect concurrent access (shared across threads)
-std::mutex mutex;
+对于没有GC的语言，RAII是异常错误处理不可缺少的一环。否则，异常对程序错误处理逻辑的简化是没有意义的：不显式处理错误，即意味着资源的泄露。
 
-void RAII () {
-    // lock mutex before accessing file
-    std::lock_guard<std::mutex> lock(mutex);
+RAII在C++异常机制中是通过异常栈展开（Stack Unwinding）来实现的。控制流从throw语句移至可处理异常的catch语句。随后，堆栈的展开过程开始。其中重要的一步是：对try语句块开始到异常引发点之间完全构造（但尚未析构）的所有对象进行析构。析构函数会在以下两种情况下被调用保证了资源的安全释放：
 
-    // access shared resource between threads
-    ...
-
-    // mutex will be unlocked (from lock_guard destructor) when 
-    // leaving scope (regardless of exception)
-}
-```
-
-```cpp
-// case 3: 文件句柄
-class ScopeGuard {
-public:
-    explicit ScopeGuard(FILE * f):_f(f) {}
-    ~scope_guard_t() { if(_f != NULL) fclose(_f); }
-
-private:
-    FILE * _f;
-    // noncopyable
-    ScopeGuard(ScopeGuard const&);
-    ScopeGuard& operator=(ScopeGuard const&);
-};
-
-int main(){
-    File* f = fopen("a.txt", "r");
-    ScopeGuard guard(f);
-}
-```
+* 对象离开作用域时，one true path上资源的释放。
+* 异常栈展开时，栈上资源的释放。
 
 ## 异常和错误码
 
