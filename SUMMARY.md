@@ -16,11 +16,11 @@
 
 ## 设计和实现
 
-* [对象模型](model/model.md)
-* [类与对象模型](model/encapsulation.md)
-* [继承与对象模型](model/inheritance.md)
-* [多态与对象模型]()
 * [类型]()
+* [对象模型](internals/model.md)
+* [封装](internals/encapsulation.md)
+* [继承](internals/inheritance.md)
+* [多态]()
 
 ## 内存管理
 
