@@ -1,10 +1,25 @@
 # 异常和RAII
 
-异常是大多数现代语言都支持的错误处理机制，这一机制在为开发者提供便利的同时，也带来了一些内存资源管理方面的挑战。现实中，C++编译器都没有实现自动垃圾回收，异常的正常工作就依赖一项重要技术：RAII。
+异常在现代编程语言中随处可见。尽管用不用异常仍然是一个争议性话题，它至少在让代码变得更干净这一点上提供了某种便利。想象一下没有异常的话，所有函数的返回值都被错误码占用，连下标访问这种很直观的语法都不再有效了。
+
+```cpp
+std::map<int, int> dict;
+
+// with exception
+int v = dict[2];
+
+// without exception
+int v;
+int err = dict.get(2, v);
+if(err != 0) {...}
+else {...}
+```
+
+相较于Java/C#，C++是一门特别的语言。它提供了异常支持，但C++编译器却大都没有实现自动垃圾回收，进而出现了一些资源管理方面的挑战。
 
 ## 从一个例子开始
 
-一个网络服务程序从网络上接收一个请求包，然后原样发送回去，最后在成功处理后打印一条log。
+以下是一个网络服务程序的示例，它从网络上接收一个请求包，然后原样发送回去，最后在成功处理后打印一条log。
 
 ```cpp
 int ProcessConnection() {
@@ -29,18 +44,17 @@ int ProcessConnection() {
 
 这个实现有两处不太好的地方。
 
-首先，频繁的错误码检查。在两处有网络IO的地方，它仔细检查了返回值是否为0来判断是否处理成功。如果失败，函数立即退出。Process函数虽然对Receive和Send中发生的非预期情况做了一些响应，实际上只是保持了某种沉默和中立：除了将错误向更外层传递之外，没有别的选择。
+首先，频繁的错误码检查。在两处有网络IO的地方，它仔细检查了返回值是否为0来判断是否处理成功。如果失败，函数立即退出。Process函数虽然对Receive和Send中发生的非预期情况做了一些响应，实际上，只是保持了某种中立和沉默：除了将错误向更外层传递之外，没有别的选择。
 
 综合整个函数掉栈来看，错误码的传递和检查的繁琐问题更加明显。调用链上游函数要对下游每个函数的每个错误负责，任何疏忽都将导致错误对上永久被“压制”。
 
 ![error code passing](error_code_passing.png)
 
-除了已经检查的错误，仍然有两处可能发生错误的地方（概率较低）没有检查。实际上，很多现实中运行很好的代码都会忽略这两种情况下的错误处理：我们有时候不惜冒险以回避繁琐的错误码检查。
-
+除了已经检查的错误，仍然有两处可能发生错误的地方（概率较低）没有检查，很多现实中运行很好的代码都会忽略这两种情况下的错误处理。这表明，我们有时候不惜冒险以回避繁琐的错误码检查。
 * [operator new](https://en.cppreference.com/w/cpp/memory/new/operator_new)可能因为内存不足返回空指针。
 * [printf](http://www.cplusplus.com/reference/cstdio/printf/)函数因为IO错误返回<0的错误码。
 
-其次，资源清理逻辑也显得比较机械和啰嗦。在函数的执行过程中，会随时申请资源（内存、文件句柄、socket等）。在每一个可能发生错误的地方，已经申请的资源是动态变化的。因此，在每一个可能发生错误的地方都要根据当前不同的资源残留情况，针对性的进行清理，操作必须十分小心。
+其次，资源清理逻辑也显得比较机械和啰嗦。在函数的执行过程中，可能随时申请资源（内存、文件、socket等）。因此，在每一个可能发生错误的地方，已申请未释放的资源都可能有所不同，需要根据当前的资源残留情况，进行针对性的清理，操作必须十分小心。
 
 ## 如何改进
 
@@ -151,20 +165,23 @@ void copy(const path& from, const path& to);
 void copy(const path& from, const path& to, system::error_code& ec);
 ```
 
-大多数历史较短的语言都有异常机制，而go作为一门专注后台开发的年轻语言有些例外。go坚定地[拒绝异常](https://blog.golang.org/error-handling-and-go)，“Go solves the exception problem by not having exceptions.”。go认为开发者应该及时、明确、高效地处理自己程序中可能出现的任何错误。并且提供了多返回值，可以用来增加一个类型为`error`的返回值，避免单一返回值被错误码占用的尴尬情况。
+大多数历史较短的语言都有异常机制，而go作为一门专注后台开发的年轻语言有些例外。go坚定地[拒绝异常](https://blog.golang.org/error-handling-and-go)，“Go solves the exception problem by not having exceptions.”。go认为开发者应该及时、明确、高效地处理自己程序中可能出现的任何错误。go提供了多返回值，可以用来增加一个类型为`error`的返回值，避免单一返回值被错误码占用的尴尬情况。
 
-> In Go, error handling is important. The language's design and conventions encourage you to explicitly check for errors where they occur (as distinct from the convention in other languages of throwing exceptions and sometimes catching them).
+```
+In Go, error handling is important. The language's design and conventions encourage you to explicitly check for errors where they occur (as distinct from the convention in other languages of throwing exceptions and sometimes catching them).
+```
 
-大家常提的google的[C++ style guide](https://google.github.io/styleguide/cppguide.html#Exceptions)对异常的使用给出了自己的意见。首先，开门见山：“We do not use C++ exceptions”。理由是异常总体来说利大于弊，但是我们有太多没有为异常准备好的代码，所以建议不要使用。
+大家常提的google [C++ style guide](https://google.github.io/styleguide/cppguide.html#Exceptions)对异常的使用给出了自己的意见。首先，开门见山：“We do not use C++ exceptions”。理由是异常总体来说利大于弊，但是我们有太多没有为异常准备好的代码，所以建议不要使用。
 
-> On their face, the benefits of using exceptions outweigh the costs, especially in new projects. However, for existing code, the introduction of exceptions has implications on all dependent code. If exceptions can be propagated beyond a new project, it also becomes problematic to integrate the new project into existing exception-free code. Because most existing C++ code at Google is not prepared to deal with exceptions, it is comparatively difficult to adopt new code that generates exceptions.
+```
+On their face, the benefits of using exceptions outweigh the costs, especially in new projects. However, for existing code, the introduction of exceptions has implications on all dependent code. If exceptions can be propagated beyond a new project, it also becomes problematic to integrate the new project into existing exception-free code. Because most existing C++ code at Google is not prepared to deal with exceptions, it is comparatively difficult to adopt new code that generates exceptions.
+```
 
 C++的异常和RAII还直接导致了一些常见设计或者约定，例如：
 
 * 使用格外的Init函数来构造对象，而不是构造函数本身。这是惯用错误码的人，既想使用C++的类又想避免异常，想出的一个方法（他们真正想要的是C with class）。既然构造函数没有返回值，无法通知错误，那就只在构造函数中做一些不可能发生异常的事情，将其他工作挪到Init函数中去。严谨来看的话，这破坏了RAII，即构造函数完成时并不代表对象构造完成，为此，又不得不为类增加isInit成员，并在每个接口函数中检查它。
 * 禁止析构函数抛出异常。析构函数的被调用的场景有两个：对象离开作用域和异常栈展开。如果在异常栈展开时，析构函数再次抛出异常，将导致一个嵌套的异常处理流程，编译系统对此的应对是立即中止并退出进程。
 * C++支持异常，但是为了兼容C，g++ 提供编译选项`-fno-exceptions`在编译C++时禁止异常。operator new也有一个[无异常版本](http://www.cplusplus.com/reference/new/nothrow/)`char* p = new (std::nothrow) char [1048576]`。
-
 
 ## 争论
 
