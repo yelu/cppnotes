@@ -53,9 +53,9 @@ CMake这时的出现提供了又一层更高的抽象，它能以统一的语法
 
 ## CMake Scripting Language
 
-CMake发明了一套自己的脚本编程语言。构建开的时候，它会默认寻找当前目录下一个叫做`CMakeLists.txt`的文件作为入口，这个文件里面保存的就是构建脚本。CMake初学者可能对这个文件的心里预期是配置文件，这种理解会阻碍对CMake的进一步学习，是纠正观念的时候了：`CMakeLists.txt`是脚本文件，被CMake加载、一步一步解释执行。
+CMake拥有一套自己的脚本编程语言。构建起始，它会默认寻找指定目录下一个叫做`CMakeLists.txt`的文件作为入口，该文件的内容就是构建脚本，被CMake加载、一步步解释执行。初学者可能对这个文件的心里预期是配置文件，这种偏差会阻碍对CMake的进一步理解。
 
-CMake的脚本语法是围绕着编译这个目标设计的。支持变量、函数调用、宏、分支条件判断、for循环和脚本文件的包含引用。
+CMake脚本语法是围绕着编译这个目标设计的，它支持变量、列表、函数调用、宏、分支条件判断、for循环和脚本文件的包含引用。
 
 ```cmake
 cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
@@ -76,17 +76,13 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 ```
 
-CMake的功能集合对于使用者来说，在很多方面都挺灾难的。首先，它的语法对大多数人来说都是陌生的，开始一个新项目的方式往往是基于一个已有的模板进行修改。如果有某些不常见的需求，在`CMakelists.txt`里面对应要怎么写这件事全靠StackOverflow。这个启动的成本很让人头疼和尴尬。
-
-其次，CMake文档的写作风格继承了MSDN的精髓，大多没有例子，内容是标题的重复，“详实而看不懂”，让人很沮丧。
-
-![CMake Documentation for add_compile_definitions](cmake_doc.png)
+CMake的语法对于使用者来说，在很多方面都挺灾难的。首先，它的语法对大多数人来说都是陌生的，开始一个新项目的方式往往只能基于一个已有的模板进行修改。如果出现了某些不常见的需求，在`CMakelists.txt`里面对应要怎么写这件事往往全靠Google和StackOverflow，很让人头疼和尴尬。其次，CMake文档的写作风格继承了MSDN的精髓，长篇大论，例子稀少，很难耐心阅读下去。
 
 ## Modern CMake is Built on Targets
 
-现代CMake是构建在target和target之间的相互依赖上的。核心概念target指的就是一个具体的编译目标，即一个静态库(lib)、动态库(so/dll)或可执行程序。
+target是现代CMake的核心概念，一个target就是一个具体的编译目标，即一个静态库(lib)、动态库(so/dll)或可执行程序。
 
-每个target都有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。target和target之间的依赖通过`target_link_libraries`命令定义。
+每个target有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。target和target之间的依赖则通过`target_link_libraries`命令定义，整个CMake构建流程的基础就是据此建立的target之间依赖关系。这种方式和package管理系统很类似，以python为例，target就像pip包，target之间的依赖就像通过requirements.txt指定的pip依赖包列表，它们之间的依赖关系构成了一个有向无环图。
 
 ```cmake
 add_executable(hello helloworld.cpp)
@@ -96,4 +92,87 @@ target_include_directories(hello PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(hello PUBLIC protobuf::libprotoc)
 ```
 
+## CMake工作流程
+
+CMake的整个工作流程包含3个阶段：configure、generate和build。
+
+在configre阶段，CMake会解析CMakeLists.txt文件，检测系统安装的C/C++编译器信息，写入一些变量至CMakeCache.txt中供后续步骤使用。generate阶段会产出构建系统所需的文件，对于GNU make来说就是`Makefile`。这两步通常被一起执行：
+
+```bash
+$> cmake -S . -B build
+-- The C compiler identification is GNU 4.8.4
+-- The CXX compiler identification is GNU 4.8.4
+-- Check for working C compiler: /usr/bin/cc
+-- Check for working C compiler: /usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /usr/bin/c++
+-- Check for working CXX compiler: /usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+Processing CMakeLists.txt
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /.../build
+```
+
+到了build阶段，就完全是构建系统自己的事情了，CMake只需启动对应的构建系统开始构建即可。
+
+```bash
+$> cmake --build build
+Scanning dependencies of target target_b
+[ 50%] Building CXX object CMakeFiles/target_b.dir/b.cpp.o
+[100%] Linking CXX library target_b
+[100%] Built target target_b
+```
+
+下图展示了构建流程的各个阶段，以及CMakeLists.txt中的语句如何最终影响编译和链接行为。
+
 ![CMake Stages](cmake_stages.png)
+
+## 经验和建议
+
+### Multi-config和Single-config
+
+构建系统分为两类，第一类是Visual Studio、Xcode和Ninja等，一个工程文件可以同时包含多套构建配置，如Debug/Release，这类构建系统称为是Multi-config的。另一类就是GNU make等，工程文件只能包含一套配置，称为Single-config。
+
+工程文件是在generate阶段产生的，且不会再改变，这就导致在Multi-config和Single-config下，CMake有不同的使用方式。
+* 对于Multi-config系统，generate阶段要决定产生**包含哪些配置**的工程文件。在build阶段，需要选择其中一种或多种进行构建。
+* 对于Single-config系统，generate阶段要决定产生**哪一种配置**的工程文件。在build阶段，无需再选择，因为没有选择。
+
+```bash
+# Multi-config
+cmake -S . -B build -DCMAKE_CONFIGURATION_TYPES="Debug;Release" -G "Visual Studio 16 2019" -A x64
+cmake --build build --config Release
+
+# Single-config
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+```
+
+### generator expression
+
+CMake在configure阶段获取的信息有限，有些信息只有在generate阶段真正产生构建系统所需文件时才能被确定下来，使用了这些信息的表达式被称为[generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。例如：
+* 当前是Debug配置，Release配置？可通过\$\<CONFIG:Debug\>获取。
+* 目标文件在哪？可通过\$\<TARGET_FILE_DIR:target_a\>获取。
+
+generator expression还可以很方便地实现conditional include、conditional link。
+
+```cmake
+# boost仅在从源码编译的时候才需要，依赖已编译并INSTALL的package，无需boost
+# spdlog则是两种情况下都需要
+target_link_libraries(cmftk 
+    PUBLIC
+        $<BUILD_INTERFACE:Boost::filesystem>
+        $<INSTALL_INTERFACE:spdlog::spdlog_header_only>)
+```
+
+## 练习
+
+**1.** 假设使用Multi-config build system，根据当前配置是Debug还是Release，将编译输出拷贝到不同的目标路径下。怎样用CMake实现？
+
+**2.** 某代码在build阶段需要读取一个系统环境变量，例如BOOST_ROOT。能在`CMakeLists.txt`里面设置吗？如果可以，怎么设置？

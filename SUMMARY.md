@@ -2,10 +2,10 @@
 
 * [Notes on learning C++](README.md)
 
-## 导言
+## 导论
 
-* [C++难在哪](introduction/why_difficult.md)
-* [能不用C++吗](introduction/why_cpp.md)
+* [C++复杂论](introduction/why_difficult.md)
+* [C++无用论](introduction/why_cpp.md)
 
 ## 基础知识
 
