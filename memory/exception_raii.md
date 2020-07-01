@@ -1,6 +1,6 @@
 # 异常和RAII
 
-异常在现代编程语言中随处可见。尽管用不用异常仍然是一个争议性话题，它至少在让代码变得更干净这一点上提供了某种便利。想象一下没有异常的话，所有函数的返回值都被错误码占用，连下标访问这种很直观的语法都不再有效了。
+异常在现代编程语言中随处可见，它在让代码变得更干净这一点上提供了某种便利。想象一下没有异常的话，所有函数的返回值都被错误码占用，连下标访问这种很直观的操作符重载语法都不再有效，这不能不说是一种遗憾。
 
 ```cpp
 std::map<int, int> dict;
@@ -79,8 +79,7 @@ C++提供了支持来实现以上的想法，它依靠的是两点重要的设�
 
 ## 异常和RAII
 
-RAII(resource acquisition is initialization)是在1984–89年，伴随着C++中异常安全的资源管理机制，由Bjarne Stroustrup提出的。RAII的核心思路是把系统资源和对象的生命周期绑定：
-
+RAII(resource acquisition is initialization)是在1984–89年，伴随C++中异常安全的资源管理机制，由Bjarne Stroustrup提出的。RAII的核心思路是把系统资源和对象的生命周期绑定：
 * 对象创建时获取资源（类的构造函数中分配资源）。
 * 对象销毁释放资源（析构函数中释放资源）。
 
@@ -146,7 +145,7 @@ int main(){
 }
 ```
 
-## 异常vs错误码
+## 异常和错误码
 
 在使用错误码时，程序的正常业务逻辑（one true path/happy path）和错误处理逻辑是交织在一起的。异常本质上来说是为错误处理开辟了一个独立的处理信道，来实现one true path和错误处理逻辑的“分离”。
 
@@ -154,7 +153,7 @@ int main(){
 
 ![code path](code_path.png)
 
-## 针对错误处理的不同设计
+## 错误处理的不同方案
 
 Error handling看起来只是一个编程习惯和风格问题，但其实这个话题从2000年开始就开始在学术界、工业界引起大量争论。这些争论和分歧，以及带来的影响，从很多地方都能感觉到。
 
@@ -177,11 +176,13 @@ In Go, error handling is important. The language's design and conventions encour
 On their face, the benefits of using exceptions outweigh the costs, especially in new projects. However, for existing code, the introduction of exceptions has implications on all dependent code. If exceptions can be propagated beyond a new project, it also becomes problematic to integrate the new project into existing exception-free code. Because most existing C++ code at Google is not prepared to deal with exceptions, it is comparatively difficult to adopt new code that generates exceptions.
 ```
 
-C++的异常和RAII还直接导致了一些常见设计或者约定，例如：
+C++的异常和RAII还直接导致了一些常见设计或者约定，此处列举有三。
 
-* 使用格外的Init函数来构造对象，而不是构造函数本身。这是惯用错误码的人，既想使用C++的类又想避免异常，想出的一个方法（他们真正想要的是C with class）。既然构造函数没有返回值，无法通知错误，那就只在构造函数中做一些不可能发生异常的事情，将其他工作挪到Init函数中去。严谨来看的话，这破坏了RAII，即构造函数完成时并不代表对象构造完成，为此，又不得不为类增加isInit成员，并在每个接口函数中检查它。
-* 禁止析构函数抛出异常。析构函数的被调用的场景有两个：对象离开作用域和异常栈展开。如果在异常栈展开时，析构函数再次抛出异常，将导致一个嵌套的异常处理流程，编译系统对此的应对是立即中止并退出进程。
-* C++支持异常，但是为了兼容C，g++ 提供编译选项`-fno-exceptions`在编译C++时禁止异常。operator new也有一个[无异常版本](http://www.cplusplus.com/reference/new/nothrow/)`char* p = new (std::nothrow) char [1048576]`。
+第一，使用格外的Init函数来构造对象，而不是构造函数本身。这是惯用错误码的人，既想使用C++的类又想避免异常，想出的一个方法（他们真正想要的是C with class）。既然构造函数没有返回值，无法通知错误，那就只在构造函数中做一些不可能发生异常的事情，将其他工作挪到一个叫`Init`的函数中。实际上，这破坏了RAII，即构造函数完成时并不代表对象构造完成，为此，又不得不增加`is_init`成员，并在每个接口函数中检查它。
+
+第二，禁止析构函数抛出异常。析构函数被调用的场景有两个：对象离开作用域和异常栈展开。如果在异常栈展开时，析构函数再次抛出异常，将导致一个嵌套的异常处理流程，编译系统对此的应对是立即中止并退出进程。
+
+第三，C++支持禁止异常。为了兼容C，g++ 提供编译选项`-fno-exceptions`在编译时禁止异常。operator new也有一个[无异常版本](http://www.cplusplus.com/reference/new/nothrow/)：`char* p = new (std::nothrow) char [UINT64_MAX]`。
 
 ## 争论
 
