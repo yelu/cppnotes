@@ -2,11 +2,8 @@
 
 ## 导论
 
-* [C++复杂论](introduction/why_difficult.md)
-* [C++无用论](introduction/why_cpp.md)
-
-## 基础知识
-
+* [C++复杂论](basic/why_difficult.md)
+* [C++无用论](basic/why_cpp.md)
 * [编程范式](basic/paradigm.md)
 * [指针](basic/pointer.md)
 
@@ -17,7 +14,7 @@
 
 ## 对象模型
 
-* [什么是对象模型](model/introduction.md)
+* [什么是对象模型](model/model.md)
 * [类与对象模型](model/encapsulation.md)
 * [继承与对象模型](model/inheritance.md)
 * [多态与对象模型]()
