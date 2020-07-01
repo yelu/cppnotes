@@ -96,7 +96,7 @@ target_link_libraries(hello PUBLIC protobuf::libprotoc)
 
 CMake的整个工作流程包含3个阶段：configure、generate和build。
 
-在configre阶段，CMake会解析CMakeLists.txt文件，检测系统安装的C/C++编译器信息，写入一些变量至CMakeCache.txt中供后续步骤使用。generate阶段会产出构建系统所需的文件，对于GNU make来说就是`Makefile`。这两步通常被一起执行：
+在configure阶段，CMake会对CMakeLists.txt文件做初步解析，检测系统安装的C/C++编译器信息，将一些变量的值保存至CMakeCache.txt中供后续步骤使用。generate阶段会产出构建系统所需的文件，对于GNU make来说就是`Makefile`。这两步通常被一起执行：
 
 ```bash
 $> cmake -S . -B build
