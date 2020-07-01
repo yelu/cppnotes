@@ -31,8 +31,5 @@
 * [Scope Guard](design_pattern/scope_guard.md)
 * [单例]()
 * [工厂]()
-
-## 进阶
-
 * [内存泄漏]()
 * [性能优化]()
