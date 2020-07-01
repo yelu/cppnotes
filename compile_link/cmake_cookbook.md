@@ -164,7 +164,7 @@ generator expression还可以很方便地实现conditional include、conditional
 
 ```cmake
 # boost仅在从源码编译target_b的时候才需要
-# 链接已编译的libtarget_b.a，则无需依赖boost
+# 链接已编译并安装的libtarget_b.a，则无需依赖boost
 target_link_libraries(target_b 
     PUBLIC
         $<BUILD_INTERFACE:Boost::filesystem>)

@@ -14,12 +14,13 @@
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
 * [CMake基础](compile_link/cmake_cookbook.md)
 
-## 对象模型
+## 对象
 
-* [什么是对象模型](model/model.md)
+* [对象模型](model/model.md)
 * [类与对象模型](model/encapsulation.md)
 * [继承与对象模型](model/inheritance.md)
 * [多态与对象模型]()
+* [类型]()
 
 ## 内存管理
 
