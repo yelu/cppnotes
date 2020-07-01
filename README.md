@@ -12,28 +12,27 @@
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
 * [CMake基础](compile_link/cmake_cookbook.md)
 
-## 对象模型
+## 设计和实现
 
-* [什么是对象模型](model/model.md)
+* [对象模型](model/model.md)
 * [类与对象模型](model/encapsulation.md)
 * [继承与对象模型](model/inheritance.md)
 * [多态与对象模型]()
+* [类型]()
 
 ## 内存管理
 
 * [堆和栈](memory/unk.md)
-* [异常和RAII](memory/exception_raii.md)
+* [内存分配器]()
 
-## 模板
+## 模式和实践
 
-## 常用设计模式
-
-* [Scope Guard]()
+* [异常和错误处理](design_pattern/exception.md)
+* [Scope Guard](design_pattern/scope_guard.md)
 * [单例]()
 * [工厂]()
 
 ## 进阶
 
-* [内存分配器]()
 * [内存泄漏]()
 * [性能优化]()
