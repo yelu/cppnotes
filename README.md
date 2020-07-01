@@ -1,9 +1,9 @@
 # Notes on learning C++
 
-## 导言
+## 导论
 
-* [C++难在哪](introduction/why_difficult.md)
-* [能不用C++吗](introduction/why_cpp.md)
+* [C++复杂论](introduction/why_difficult.md)
+* [C++无用论](introduction/why_cpp.md)
 
 ## 基础知识
 
@@ -13,6 +13,7 @@
 ## 编译和链接
 
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
+* [CMake基础](compile_link/cmake_cookbook.md)
 
 ## 对象模型
 

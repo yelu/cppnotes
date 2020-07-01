@@ -71,18 +71,20 @@ ENDIF()
 # function call
 message("CMAKE_PREFIX_PATH=${CMAKE_PREFIX_PATH}")
 
-# introduce another cmake script file
+# introduce other cmake script files
 include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 ```
 
-CMake的语法对于使用者来说，在很多方面都挺灾难的。首先，它的语法对大多数人来说都是陌生的，开始一个新项目的方式往往只能基于一个已有的模板进行修改。如果出现了某些不常见的需求，在`CMakelists.txt`里面对应要怎么写这件事往往全靠Google和StackOverflow，很让人头疼和尴尬。其次，CMake文档的写作风格继承了MSDN的精髓，长篇大论，例子稀少，很难耐心阅读下去。
+CMake的语法对于使用者，在很多方面都挺灾难的。首先，它的语法对大多数人来说都是陌生的，开始一个新项目的方式往往只能是基于一个已有的模板进行修改。如果出现了某些不常见的需求，在`CMakelists.txt`里面对应要怎么写这件事往往全靠Google和StackOverflow，很让人头疼和尴尬。其次，CMake文档的写作风格继承了MSDN的精髓，长篇大论，例子稀少，很难耐心阅读下去。
 
 ## Modern CMake is Built on Targets
 
 target是现代CMake的核心概念，一个target就是一个具体的编译目标，即一个静态库(lib)、动态库(so/dll)或可执行程序。
 
-每个target有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。target和target之间的依赖则通过`target_link_libraries`命令定义，整个CMake构建流程的基础就是据此建立的target之间依赖关系。这种方式和package管理系统很类似，以python为例，target就像pip包，target之间的依赖就像通过requirements.txt指定的pip依赖包列表，它们之间的依赖关系构成了一个有向无环图。
+每个target有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。
+
+target和target之间的依赖则通过`target_link_libraries`命令定义，整个CMake构建流程的基础就是据此建立的target之间依赖关系。这种方式和package管理系统很类似，以python为例，target就像pip包，target之间的依赖就像通过requirements.txt指定的pip依赖包列表，它们之间的依赖关系构成了一个有向无环图。
 
 ```cmake
 add_executable(hello helloworld.cpp)
@@ -154,11 +156,11 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-### generator expression
+### Generator Expression
 
-CMake在configure阶段获取的信息有限，有些信息只有在generate阶段真正产生构建系统所需文件时才能被确定下来，使用了这些信息的表达式被称为[generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。例如：
-* 当前是Debug配置，Release配置？可通过\$\<CONFIG:Debug\>获取。
-* 目标文件在哪？可通过\$\<TARGET_FILE_DIR:target_a\>获取。
+CMake在configure阶段获取的信息有限，更丰富的信息只有在generate阶段真正产生构建系统所需文件时才能被确定下来，使用了这些信息的表达式被称为[generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。例如：
+* 当前是Debug配置，Release配置？可通过`$<CONFIG:Debug\>`获取。
+* 目标文件在哪？可通过`$<TARGET_FILE_DIR:target_a>`获取。
 
 generator expression还可以很方便地实现conditional include、conditional link。
 
@@ -173,6 +175,6 @@ target_link_libraries(cmftk
 
 ## 练习
 
-**1.** 假设使用Multi-config build system，根据当前配置是Debug还是Release，将编译输出拷贝到不同的目标路径下。怎样用CMake实现？
+**1.** 使用CMake为一个Multi-config构建系统生成工程，根据当前配置是Debug还是Release，将编译输出拷贝到不同的目标路径下。
 
-**2.** 某代码在build阶段需要读取一个系统环境变量，例如BOOST_ROOT。能在`CMakeLists.txt`里面设置吗？如果可以，怎么设置？
+**2.** 某代码在编译阶段需要读取一个系统环境变量，例如BOOST_ROOT。能在`CMakeLists.txt`里面设置该变量吗？如果可以，怎么设置？
