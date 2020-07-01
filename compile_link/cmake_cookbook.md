@@ -31,7 +31,7 @@ g++ main.cpp -I /path/to/include -L /path/tp/lib -l libbencoding -o foo.exe -std
 * [MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2019), with Microsoft Visual Studio
 * [xcodebuild](https://developer.apple.com/library/archive/technotes/tn2339/_index.html), with Apple Xcode
 
-有了构建系统，编译的流程就变成了提供对应构建系统的配置文件，例如Makefile(GNU Make)、vcproj(Visual Studio)或xcodeproj(Xcode)，再调用编译系统提供的命令，如`make clean; make`等间接完成编译。
+有了构建系统，编译的流程就变成了提供对应构建系统的配置文件（很多IDE称之为工程文件），例如Makefile(GNU Make)、vcproj(Visual Studio)或xcodeproj(Xcode)，再调用编译系统提供的命令，如`make clean; make`等间接完成编译。
 
 ```makefile
 PROG=prog
@@ -47,7 +47,7 @@ clean:
     rm -f $(PROG) $(OBJS)
 ```
 
-CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置（工程）文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需配置文件的工具**。CMake目前支持几乎市面上所有无论是基于命令行还是IDE的构建系统。
+CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需配置文件的工具**。CMake目前支持几乎市面上所有无论是基于命令行还是IDE的构建系统。
 
 ![Stack of Build Tools](cmake_stack.png)
 
