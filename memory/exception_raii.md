@@ -127,15 +127,11 @@ void copy(const path& from, const path& to, system::error_code& ec);
 
 大多数历史较短的语言都有异常机制，而go作为一门专注后台开发的年轻语言有些例外。go坚定地[拒绝异常](https://blog.golang.org/error-handling-and-go)，“Go solves the exception problem by not having exceptions.”。go认为开发者应该及时、明确、高效地处理自己程序中可能出现的任何错误。go提供了多返回值，可以用来增加一个类型为`error`的返回值，避免单一返回值被错误码占用的尴尬情况。
 
-```
-In Go, error handling is important. The language's design and conventions encourage you to explicitly check for errors where they occur (as distinct from the convention in other languages of throwing exceptions and sometimes catching them).
-```
+> In Go, error handling is important. The language's design and conventions encourage you to explicitly check for errors where they occur (as distinct from the convention in other languages of throwing exceptions and sometimes catching them).
 
 大家常提的google [C++ style guide](https://google.github.io/styleguide/cppguide.html#Exceptions)对异常的使用给出了自己的意见。首先，开门见山：“We do not use C++ exceptions”。理由是异常总体来说利大于弊，但是我们有太多没有为异常准备好的代码，所以建议不要使用。
 
-```
-On their face, the benefits of using exceptions outweigh the costs, especially in new projects. However, for existing code, the introduction of exceptions has implications on all dependent code. If exceptions can be propagated beyond a new project, it also becomes problematic to integrate the new project into existing exception-free code. Because most existing C++ code at Google is not prepared to deal with exceptions, it is comparatively difficult to adopt new code that generates exceptions.
-```
+> On their face, the benefits of using exceptions outweigh the costs, especially in new projects. However, for existing code, the introduction of exceptions has implications on all dependent code. If exceptions can be propagated beyond a new project, it also becomes problematic to integrate the new project into existing exception-free code. Because most existing C++ code at Google is not prepared to deal with exceptions, it is comparatively difficult to adopt new code that generates exceptions.
 
 C++的异常和RAII还直接导致了一些常见设计或者约定，此处列举有三。
 
