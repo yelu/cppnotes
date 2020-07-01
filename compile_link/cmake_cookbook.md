@@ -47,7 +47,7 @@ clean:
     rm -f $(PROG) $(OBJS)
 ```
 
-CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需流程的工具**。CMake目前支持几乎市面上所有无论是基于命令行还是IDE的构建系统。
+CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置（工程）文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需配置文件的工具**。CMake目前支持几乎市面上所有无论是基于命令行还是IDE的构建系统。
 
 ![Stack of Build Tools](cmake_stack.png)
 
@@ -76,15 +76,13 @@ include(GNUInstallDirs)
 include(CMakePackageConfigHelpers)
 ```
 
-CMake的语法对于使用者，在很多方面都挺灾难的。首先，它的语法对大多数人来说都是陌生的，开始一个新项目的方式往往只能是基于一个已有的模板进行修改。如果出现了某些不常见的需求，在`CMakelists.txt`里面对应要怎么写这件事往往全靠Google和StackOverflow，很让人头疼和尴尬。其次，CMake文档的写作风格继承了MSDN的精髓，长篇大论，例子稀少，很难耐心阅读下去。
+CMake的语法从很多方面看，都挺灾难的。首先，它的语法对大多数人来说是陌生的，开始一个新项目的方式往往只能是基于一个已有的模板进行修改。如果出现了某些不常见的需求，在`CMakelists.txt`里面对应要怎么写这件事往往全靠Google和StackOverflow，很让人头疼和尴尬。其次，CMake文档的写作风格继承了MSDN的精髓，长篇大论，例子稀少，很难耐心阅读下去。
 
 ## Modern CMake is Built on Targets
 
-target是现代CMake的核心概念，一个target就是一个具体的编译目标，即一个静态库(lib)、动态库(so/dll)或可执行程序。
+target是现代CMake的核心概念，一个target就是一个具体的编译目标，即一个静态库(lib)、动态库(so/dll)或可执行程序。每个target有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。
 
-每个target有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。
-
-target和target之间的依赖则通过`target_link_libraries`命令定义，整个CMake构建流程的基础就是据此建立的target之间依赖关系。这种方式和package管理系统很类似，以python为例，target就像pip包，target之间的依赖就像通过requirements.txt指定的pip依赖包列表，它们之间的依赖关系构成了一个有向无环图。
+target和target之间的依赖则通过`target_link_libraries`命令定义，整个CMake构建流程的基础就是据此建立的target之间的依赖关系。这种方式和Package管理系统很类似，以Python为例，target就像pip包，target之间的依赖就像通过requirements.txt指定的pip依赖包列表，依赖关系构成了一个有向无环图。
 
 ```cmake
 add_executable(hello helloworld.cpp)
@@ -159,7 +157,7 @@ cmake --build build
 ### Generator Expression
 
 CMake在configure阶段获取的信息有限，更丰富的信息只有在generate阶段真正产生构建系统所需文件时才能被确定下来，使用了这些信息的表达式被称为[generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。例如：
-* 当前是Debug配置，Release配置？可通过`$<CONFIG:Debug\>`获取。
+* 当前是Debug配置，Release配置？可通过`$<CONFIG:Debug>`获取。
 * 目标文件在哪？可通过`$<TARGET_FILE_DIR:target_a>`获取。
 
 generator expression还可以很方便地实现conditional include、conditional link。
