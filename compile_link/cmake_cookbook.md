@@ -163,12 +163,11 @@ CMake在configure阶段获取的信息有限，更丰富的信息只有在genera
 generator expression还可以很方便地实现conditional include、conditional link。
 
 ```cmake
-# boost仅在从源码编译的时候才需要，依赖已编译并INSTALL的package，无需boost
-# spdlog则是两种情况下都需要
-target_link_libraries(cmftk 
+# boost仅在从源码编译target_b的时候才需要
+# 链接已编译的libtarget_b.a，则无需依赖boost
+target_link_libraries(target_b 
     PUBLIC
-        $<BUILD_INTERFACE:Boost::filesystem>
-        $<INSTALL_INTERFACE:spdlog::spdlog_header_only>)
+        $<BUILD_INTERFACE:Boost::filesystem>)
 ```
 
 ## 练习
