@@ -130,7 +130,7 @@ Scanning dependencies of target target_b
 [100%] Built target target_b
 ```
 
-下图展示了CMake工作流程的各个阶段，以及CMakeLists.txt中的语句如何最终影响编译和链接行为。
+下图展示了CMake工作流程的各个阶段，以及CMakeLists.txt中的语句如何影响最终的编译和链接行为。
 
 ![CMake Stages](cmake_stages.png)
 
