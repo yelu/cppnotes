@@ -31,7 +31,7 @@ g++ main.cpp -I /path/to/include -L /path/tp/lib -l libbencoding -o foo.exe -std
 * [MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2019), with Microsoft Visual Studio
 * [xcodebuild](https://developer.apple.com/library/archive/technotes/tn2339/_index.html), with Apple Xcode
 
-有了构建系统，编译的流程就变成了提供对应构建系统的配置文件（很多IDE称之为工程文件），例如Makefile(GNU Make)、vcproj(Visual Studio)或xcodeproj(Xcode)，再调用编译系统提供的命令，如`make clean; make`等间接完成编译。
+有了构建系统，编译的流程就变成了提供对应构建系统的配置文件（IDE常称之为工程文件），例如Makefile(GNU Make)、vcproj(Visual Studio)或xcodeproj(Xcode)，再调用编译系统提供的命令，如`make clean; make`等间接完成编译。
 
 ```makefile
 PROG=prog
@@ -47,13 +47,13 @@ clean:
     rm -f $(PROG) $(OBJS)
 ```
 
-CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需配置文件的工具**。CMake目前支持几乎市面上所有无论是基于命令行还是IDE的构建系统。
+CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需配置文件的工具**。CMake目前支持市面上几乎所有常用的，或基于命令行或基于IDE的构建系统。
 
 ![Stack of Build Tools](cmake_stack.png)
 
 ## CMake Scripting Language
 
-CMake拥有一套自己的脚本编程语言。构建起始，它会默认寻找指定目录下一个叫做`CMakeLists.txt`的文件作为入口，该文件的内容就是构建脚本，被CMake加载、一步步解释执行。初学者可能对这个文件的心里预期是配置文件，这种偏差会阻碍对CMake的进一步理解。
+CMake拥有一套自己的脚本编程语言(DSL)。构建起始，它会默认寻找指定目录下一个叫做`CMakeLists.txt`的文件作为入口，该文件的内容就是构建脚本，被CMake加载、一步步解释执行。初学者可能对这个文件的心里预期是配置文件，这种偏差会阻碍对CMake的进一步理解。
 
 CMake脚本语法是围绕着编译这个目标设计的，它支持变量、列表、函数调用、宏、分支条件判断、for循环和脚本文件的包含引用。
 
@@ -82,7 +82,7 @@ CMake的语法从很多方面看，都挺灾难的。首先，它的语法对大
 
 target是现代CMake的核心概念，一个target就是一个具体的编译目标，即一个静态库(lib)、动态库(so/dll)或可执行程序。每个target有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。
 
-target和target之间的依赖则通过`target_link_libraries`命令定义，整个CMake构建流程的基础就是据此建立的target之间的依赖关系。这种方式和Package管理系统很类似，以Python为例，target就像pip包，target之间的依赖就像通过requirements.txt指定的pip依赖包列表，依赖关系构成了一个有向无环图。
+target和target之间的依赖则通过`target_link_libraries`命令定义，整个CMake工作流程的基础就是据此建立的target之间的依赖关系。这种方式和Package管理系统很类似，以Python为例，target就像pip包，target之间的依赖就像通过requirements.txt指定的pip依赖包列表，依赖关系构成了一个有向无环图。
 
 ```cmake
 add_executable(hello helloworld.cpp)
@@ -96,7 +96,7 @@ target_link_libraries(hello PUBLIC protobuf::libprotoc)
 
 CMake的整个工作流程包含3个阶段：configure、generate和build。
 
-在configure阶段，CMake会对CMakeLists.txt文件做初步解析，检测系统安装的C/C++编译器信息，将一些变量的值保存至CMakeCache.txt中供后续步骤使用。generate阶段会产出构建系统所需的配置（工程）文件，对于GNU make来说就是`Makefile`。这两步通常被一起执行：
+在configure阶段，CMake会检测系统安装的C/C++编译器的信息，执行CMakeLists.txt中的脚本，分析其中的target依赖关系，最终将所有变量的值保存至CMakeCache.txt中供后续步骤使用。generate阶段会产出构建系统所需的配置（工程）文件，对于GNU make来说就是`Makefile`。这两步通常被一起执行：
 
 ```bash
 $> cmake -S . -B build
@@ -134,9 +134,7 @@ Scanning dependencies of target target_b
 
 ![CMake Stages](cmake_stages.png)
 
-## 经验和建议
-
-### Multi-config和Single-config
+## Multi-config和Single-config
 
 构建系统分为两类，第一类是Visual Studio、Xcode和Ninja等，一个工程文件可以同时包含多套构建配置，如Debug/Release，这类构建系统称为是Multi-config的。另一类就是GNU make等，工程文件只能包含一套配置，称为Single-config。
 
@@ -154,20 +152,49 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
 
-### Generator Expression
+## Generator Expression
 
-CMake在configure阶段获取的信息有限，更丰富的信息只有在generate阶段真正产生构建系统所需文件时才能被确定下来，使用了这些信息的表达式被称为[generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。例如：
-* 当前是Debug配置，Release配置？可通过`$<CONFIG:Debug>`获取。
-* 目标文件在哪？可通过`$<TARGET_FILE_DIR:target_a>`获取。
+[generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)是一个晦涩难懂，却又得经常使用的特性。
 
-generator expression还可以很方便地实现conditional include、conditional link。
+
+下面的CMake脚本想达到的目的是，对于Debug build，把目标文件拷贝到安装路径下的debug子目录中去，而对于非Debug build，直接拷贝到安装路径。对于Single-config的GNU makefile，这样做没有问题。但是，对于Multi-config的Visual Studio，这个目标达不到。CMakeLists.txt文件在configure阶段就已经被解释执行了，此时工程文件尚未生成，条件分支实际上就只有一个会生效，没办法做到同时为Debug和Release配置不同的目标拷贝路径。
 
 ```cmake
-# boost仅在从源码编译target_b的时候才需要
-# 链接已编译并安装的libtarget_b.a，则无需依赖boost
-target_link_libraries(target_b 
+if (CMAKE_BUILD_TYPE EQUAL "Debug")
+    add_custom_command(
+    TARGET target_b POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            $<TARGET_FILE_DIR:target_b>
+            ${CMAKE_INSTALL_PREFIX}/target_b/debug)
+else ()
+    add_custom_command(
+    TARGET target_b POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            $<TARGET_FILE_DIR:target_b>
+            ${CMAKE_INSTALL_PREFIX}/target_b)
+endif ()
+
+```
+
+因此，CMake提供了不在configure阶段，而是在后续阶段延迟运算和求值的generator expression。`$<$<CONFIG:Debug>:debug>`在Debug build时evaluate为debug，否则为空。这个实现同时支持Single-config和Multi-config构建系统。
+
+```cmake
+add_custom_command(
+    TARGET target_b POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+            $<TARGET_FILE_DIR:target_b>
+            ${CMAKE_INSTALL_PREFIX}/target_b/$<$<CONFIG:Debug>:debug>)
+```
+
+generator expression可做的事情有[很多](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)，其中比较常用的一例是，方便地实现conditional include和linking。
+
+```cmake
+# RapidJSON_INCLUDE_DIR仅在源码编译时需要被查找
+# include目录仅在作为package安装后，被find_pacakge()导入时需要被查找
+target_include_directories(target_b 
     PUBLIC
-        $<BUILD_INTERFACE:Boost::filesystem>)
+        $<BUILD_INTERFACE:${RapidJSON_INCLUDE_DIR}>
+        $<INSTALL_INTERFACE:include>)
 ```
 
 ## 练习

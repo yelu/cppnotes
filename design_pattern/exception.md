@@ -42,7 +42,7 @@ int ProcessConnection() {
 }
 ```
 
-这个实现有两处不太好的地方。
+该实现问题有二。
 
 首先，频繁的错误码检查。在两处有网络IO的地方，它仔细检查了返回值是否为0来判断是否处理成功。如果失败，函数立即退出。Process函数虽然对Receive和Send中发生的非预期情况做了一些响应，实际上，只是保持了某种中立和沉默：除了将错误向更外层传递之外，没有别的选择。
 
@@ -58,7 +58,7 @@ int ProcessConnection() {
 
 ## 如何改进
 
-如果有一种自动化的机制会更好：在不可恢复的错误发生时，立即停止执行、报告错误，并清理已经申请的资源。假设这种机制存在，代码可以简化如下：
+让世界更美好，需要某种自动化机制：在不可恢复的错误发生时，立即停止执行、报告错误，并清理已经申请的资源。假设这种机制存在，代码可以简化如下：
 
 ```cpp
 void ProcessConnection() {
@@ -72,17 +72,16 @@ void ProcessConnection() {
 }
 ```
 
-C++提供了支持来实现以上的想法，它依靠的是两点重要的设计：
+C++提供了支持来实现以上的想法，依靠的是两点重要的设计：
 
 * 异常（Exceptipn）。在错误发生时抛出（throw）以终止执行并汇报出错信息。
-* RAII。跟踪栈变量，在异常发生时，释放其关联的资源。
+* RAII。在异常发生时，释放其关联的资源。
 
 ## 异常和RAII
 
-[RAII](https://en.cppreference.com/w/cpp/language/raii)(resource acquisition is initialization)是在1984–1989年，伴随C++中异常安全的资源管理机制，由Bjarne Stroustrup提出的。RAII的核心思路是把系统资源和对象的生命周期绑定。Scope Guard模式就是对RAII的有效利用。
+在发生异常时，开发者没有机会提供释放资源代码，安全的异常处理必须转而建立在对RAII的支持之上。
 
-* 对象创建时，获取资源（类的构造函数中分配资源）。
-* 对象离开作用域被销毁时，释放资源（析构函数中释放资源）。
+异常发生时，控制流从throw语句移至可处理异常的catch语句。随后，堆栈的展开(Stack Unwinding)过程开始。其中重要的一步是：利用RAII，对try语句块开始到异常引发点之间完全构造（但尚未析构）的所有对象进行析构。因此，有异常的地方，就该有RAII。
 
 ```cpp
 // DO NOT
@@ -98,13 +97,6 @@ void RAII() {
     ...
 }
 ```
-
-在发生异常时，RAII是通过异常栈展开（Stack Unwinding）来保证的。控制流从throw语句移至可处理异常的catch语句。随后，堆栈的展开过程开始。其中重要的一步是：对try语句块开始到异常引发点之间完全构造（但尚未析构）的所有对象进行析构。
-
-因此，析构函数在以下两种情况下都会被调用，保证了资源的安全释放：
-
-* 对象离开作用域时，one true path上资源的释放。
-* 异常栈展开时，栈上资源的释放。
 
 ## 异常和错误码
 
@@ -133,7 +125,7 @@ void copy(const path& from, const path& to, system::error_code& ec);
 
 > On their face, the benefits of using exceptions outweigh the costs, especially in new projects. However, for existing code, the introduction of exceptions has implications on all dependent code. If exceptions can be propagated beyond a new project, it also becomes problematic to integrate the new project into existing exception-free code. Because most existing C++ code at Google is not prepared to deal with exceptions, it is comparatively difficult to adopt new code that generates exceptions.
 
-C++的异常和RAII还直接导致了一些常见设计或者约定，此处列举有三。
+C++的异常和RAII还直接导致了一些常见设计和约定，此处列举有三。
 
 第一，使用格外的Init函数来构造对象，而不是构造函数本身。这是惯用错误码的人，既想使用C++的类又想避免异常，想出的一个方法（他们真正想要的是C with class）。既然构造函数没有返回值，无法通知错误，那就只在构造函数中做一些不可能发生异常的事情，将其他工作挪到一个叫`Init`的函数中。实际上，这破坏了RAII，即构造函数完成时并不代表对象构造完成，为此，又不得不增加`is_init`成员，并在每个接口函数中检查它。
 
@@ -160,3 +152,17 @@ C++的异常和RAII还直接导致了一些常见设计或者约定，此处列�
 **异常是毒品**
 
 异常是语言的一项语法特性，这是一个加法。到了一些不支持或不允许使用异常的场合，做减法去掉异常非常困难，只能重写代码。惯用错误码的开发者以此骂异常机制是毒品，没有退出机制。
+
+
+## 练习
+
+**1.** 类的析构函数在哪些情况下会被调用？
+
+为了保证了资源的安全释放，析构函数需要在以下两种情况下被调用：
+
+* one true path上，当对象离开作用域时。
+* 异常栈展开时，栈上完全构造但尚未析构的对象也会被析构。
+
+**2.** C语言有异常支持吗？通常怎么处理错误？
+
+**3.** 实现一个二分查找程序，在目标值不存在时，分别用抛出异常和返回错误码来通知错误。测试二者的性能差距。

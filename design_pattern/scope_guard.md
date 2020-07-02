@@ -12,7 +12,7 @@ char* ptr = new char[16];
 delete ptr;
 ```
 
-这个问题，可以通过恰当地使用`try...catch...`解决。但是，这种方式在C++中不算很优雅。如果资源多了，还会出现很麻烦的嵌套异常处理。
+这个问题，可以通过恰当地使用`try...catch...`解决。但是，这种方式在C++中算不得优雅。如果资源多了，还会出现很麻烦的嵌套异常处理。
 
 ```cpp
 char* ptr = nullptr;
@@ -30,12 +30,18 @@ catch() {
 
 ## RAII和资源释放
 
-C++解决这一问题的常用模式是利用RAII实现Scope Guard，核心思想是将资源和栈上对象的生命周期绑定，在对象离开作用域，析构函数被自动调用时，释放相关联的资源。其实，提供gc的语言，针对非托管的系统资源，通常也有类似的设计，例如Python的`with...as...`和C#的`using(...)`。
+[RAII](https://en.cppreference.com/w/cpp/language/raii)(resource acquisition is initialization)是在1984–1989年，伴随C++中异常安全的资源管理机制，由Bjarne Stroustrup提出的。RAII的核心思路是把系统资源和对象的生命周期绑定：
+
+* 对象创建时，获取资源（类的构造函数中分配资源）。
+* 对象离开作用域或因异常被销毁时，释放资源（析构函数中释放资源）。
+
+Scope Guard模式就是对RAII的有效利用。其核心思想是，将资源和栈上对象的生命周期绑定，在对象析构函数被自动调用时，释放相关联的资源。
 
 常见的系统资源包括内存、打开的文件和共享锁等，对这些资源的释放都已经有约定俗成的模式，好的C++代码应该考虑采用它们。
 
+使用智能指针，可以免除手动释放堆上资源。
+
 ```cpp
-// case 1: 堆内存申请
 // DO NOT
 void NoRAII() {
     Object* obj = new Object();
@@ -50,8 +56,9 @@ void RAII() {
 }
 ```
 
+使用lock_guard，避免某些分支下，忘记释放锁的尴尬。
+
 ```cpp
-// case 2: 互斥锁
 // mutex to protect concurrent access (shared across threads)
 std::mutex mutex;
 
@@ -67,8 +74,9 @@ void RAII () {
 }
 ```
 
+绑定文件句柄到栈对象上，避免手动释放，杜绝资源泄露。
+
 ```cpp
-// case 3: 文件句柄
 class ScopeGuard {
 public:
     explicit ScopeGuard(FILE * f):_f(f) {}
@@ -86,6 +94,8 @@ int main(){
     ScopeGuard guard(f);
 }
 ```
+
+其实，提供gc的语言，针对非托管的系统资源，通常也有类似以上的设计，例如Python的`with...as...`和C#的`using(...)`。
 
 ## 练习
 
