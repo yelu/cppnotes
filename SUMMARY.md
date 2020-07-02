@@ -16,7 +16,7 @@
 
 ## 设计和实现
 
-* [类型]()
+* [类型](internals/types.md)
 * [对象模型](internals/model.md)
 * [封装](internals/encapsulation.md)
 * [继承](internals/inheritance.md)
