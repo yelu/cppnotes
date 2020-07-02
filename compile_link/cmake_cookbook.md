@@ -156,7 +156,7 @@ cmake --build build
 
 [generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)是一个晦涩难懂，却又得经常使用的特性。
 
-关于generator expression，首先要解答的第一问题是它为什么存在，它能做什么没它不行的工作？让我们跟随一个例子一步步走走看。有一个需求如下，对于Debug build，把目标文件拷贝到安装路径下的debug子目录中去，而对于非Debug build，直接拷贝到安装路径。
+关于generator expression，首先要解答的问题是它为什么存在，它能做什么，没它不行吗？让我们跟随一个具体需求一步步走走看：编译目标文件产生之后，紧接着将其拷贝到自定义目标路径中。对于Debug build，目标路径为安装路径下的debug子目录，而对于非Debug build，直接拷贝到安装路径。
 
 ```cmake
 if (CMAKE_BUILD_TYPE EQUAL "Debug")
@@ -174,14 +174,13 @@ else ()
 endif ()
 ```
 
-对于Single-config的GNU makefile，以上做法没任何问题，完全能够达到目的。但问题有二。
+对于Single-config的GNU makefile，以上做法没任何问题，完全能够达到目的。除此之外，问题有二。
 
 第一，太啰嗦，重复了两遍类似的代码。
 
 第二，对于Multi-config的Visual Studio，达不到想要的目的。CMakeLists.txt文件早在configure阶段就已经被解释执行了，而Debug/Release是直到generate阶段产生工程文件时才能确定下来的。因此，CMAKE_BUILD_TYPE这个变量对Multi-config构建系统无效。
 
-正确的写法是使用这面的generator expression。`$<$<CONFIG:Debug>:debug>`在Debug build时evaluate为debug，否则为空。这个实现同时支持Single-config和Multi-config构建系统。generator expression的语法规则、提供哪些功能不是本节的重点，请移步[generator expression文档](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。
-
+generator expression可以同时解决以上两个问题。`$<$<CONFIG:Debug>:debug>`在Debug build时evaluate为debug，否则为空。这个实现还同时支持Single-config和Multi-config构建系统。
 ```cmake
 add_custom_command(
     TARGET target_b POST_BUILD
@@ -190,13 +189,17 @@ add_custom_command(
             ${CMAKE_INSTALL_PREFIX}/target_b/$<$<CONFIG:Debug>:debug>)
 ```
 
-对比两种写法可得，generator expression提供的价值有二。
+对比以上两种写法，generator expression提供的价值总结为两点。
 
-第一，拆除外层的分支判断，折叠进语句局部之中，从而消除冗余代码。类似函数式编程中的lambda表达式。
+第一，拆除一些的分支判断逻辑，将他们折叠进相关命令的参数字符串中，从而消除冗余代码。这点上很类似Python最新的字符串格式语法设计。
 
-第二，提供了延迟求值功能，configure阶段表达式并不会被求值，而是等待后续有更多信息的generate阶段。
+```py
+greeting = f'Hi {"Mr." if gender == "male" else "Mrs."} {name}'
+```
 
-generator expression可做的事情还有[很多](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)，其中比较常用的另一例是，方便地实现conditional include和linking。
+第二，提供了延迟求值功能。在configure阶段，表达式不会被求值，而是推迟到后续有更多信息的generate阶段。
+
+generator expression可做的事情还有很多，其中比较常用的另一例是，方便地实现conditional include和linking。至于generator expression的语法规则，不是本节的重点，请移步[generator expression文档](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。
 
 ```cmake
 # RapidJSON_INCLUDE_DIR仅在源码编译时需要被查找
