@@ -199,7 +199,7 @@ greeting = f'Hi {"Mr." if gender == "male" else "Mrs."} {name}'
 
 第二，提供了延迟求值功能。在configure阶段，表达式不会被求值，而是推迟到后续有更多信息的generate阶段。
 
-generator expression可做的事情还有很多，其中比较常用的另一例是，方便地实现conditional include或linking。至于generator expression的语法规则，不是本节的重点，请移步[generator expression文档](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。
+generator expression可做的事情还有很多，其中比较常用的另一例是，方便地实现conditional include或linking。至于generator expression的语法规则，非本节之志向，还请移步[generator expression文档](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。
 
 ```cmake
 # RapidJSON_INCLUDE_DIR仅在源码编译时需要被查找
