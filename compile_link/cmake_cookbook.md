@@ -156,7 +156,7 @@ cmake --build build
 
 [generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)是一个晦涩难懂，却又得经常使用的特性。
 
-关于generator expression，首先要解答的问题是它为什么存在，它能做什么，没它不行吗？让我们跟随一个具体需求一步步走走看：编译目标文件产生之后，紧接着将其拷贝到自定义目标路径中。对于Debug build，目标路径为安装路径下的debug子目录，而对于非Debug build，直接拷贝到安装路径。
+关于generator expression，首先要解答的问题是它为什么存在，它能做什么，没它不行吗？让我们跟随一个具体需求一步步走走看：在编译目标文件产生之后，把它们拷贝到自定义目标路径中去。如果是Debug build，目标路径为安装路径下的debug子目录，如果不是Debug build，直接拷贝到安装路径。
 
 ```cmake
 if (CMAKE_BUILD_TYPE EQUAL "Debug")
