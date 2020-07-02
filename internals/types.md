@@ -1,6 +1,6 @@
 # 类型
 
-C++的基本数据类型有7种(int/float/double/char/wchar_t/bool/void)，其中int/double/char还可以被合法添加一种或多种修饰符(signed/unsigned/short/long)。这些类型共同的特点是“简单”，在内存中占据连续的1-8个字节，任何操作都显得清清楚楚、干干净净。
+C++的基本数据类型有7种(int/float/double/char/wchar_t/bool/void)，其中int/double/char还可以合法组合修饰符(signed/unsigned/short/long)。这些类型共同的特点是“简单”，在内存中占据连续的1-8个字节，任何操作都显得清清楚楚、干干净净。
 
 除了基本类型，C++还引入了自定义类型，也就是类(Class)。通过组合基本类型和/或一个类，可以定义出另一个新类。
 
