@@ -186,7 +186,7 @@ add_custom_command(
             ${CMAKE_INSTALL_PREFIX}/target_b/$<$<CONFIG:Debug>:debug>)
 ```
 
-generator expression可做的事情有[很多](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)，其中比较常用的一例是，方便地实现conditional include和linking。
+generator expression可做的事情还有[很多](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)，其中比较常用的另一例是，方便地实现conditional include和linking。
 
 ```cmake
 # RapidJSON_INCLUDE_DIR仅在源码编译时需要被查找
