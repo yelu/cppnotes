@@ -8,7 +8,8 @@ C++的基本数据类型有7种(int/float/double/char/wchar_t/bool/void)，其�
 
 ```cpp
 // basic type
-int a = 1;
+int i1 = 1;
+int i2 = i1;
 
 // class type
 Type t1;
