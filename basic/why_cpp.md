@@ -24,7 +24,7 @@
 
 C++有时反而提供了某种优势。绝大多数平台或者设备一出现就会提供一个C++编译器，用来编译性能优化的Native程序。只要程序不涉及网络、UI等系统和硬件相关的资源，标准的C++代码还是很有可能被绝大多数平台支持的。具体来看，用C++实现一个跨平台的机器学习库就很合适，它的核心操作是一些通用的数值运算。而用C++写一个跨平台的网络IO库、UI库，就不是一个非常明智的选择，这是在和平台主流生态做对抗。在这方面有一个很鲜活的例子。2019年，dropbox[宣布](https://dropbox.tech/mobile/the-not-so-hidden-cost-of-sharing-code-between-ios-and-android)他们即将抛弃在iOS和Android间共享一套C++代码的做法，宁愿用Swift和Kotlin写两遍代码。
 
-![](dropbox_abandon_cpp.png)
+![The hidden cost of sharing code between iOS and Android](dropbox_abandon_cpp.png)
 
 ## 封装和性能
 
