@@ -47,8 +47,8 @@ char* concat_str(char* a, char* b);
 
 回到习惯C++ std::string类的开发者，如果不是性能要求特别苛刻，使用std::string也能简单直观地实现功能，但这其中还是有一些选择需要面对：
 
-* 常见的语法，例如const、引用，用还是不用？
-* 该返回std::string吗？返回值的复制能避免吗？这牵涉到对NRV优化（Named Return Value），以及左值右值的了解。
+* const、引用等等，用还是不用？
+* 该返回std::string吗？返回值的复制能避免吗？这牵涉到对返回值优化RVO(Return Value Optimization)，以及左值右值的了解。
 
 ```c++
 std::string concat_str(const std::string& a, const std::string& b)
