@@ -191,7 +191,7 @@ add_custom_command(
 
 对比以上两种写法，generator expression提供的价值总结为两点。
 
-第一，拆除一些的分支判断逻辑，将他们折叠进相关命令的参数字符串中，从而消除冗余代码。这点上很类似Python最新的字符串格式化语法。
+第一，将分支判断表达式直接写在需要其执行结果的地方，消除一些冗余代码。这点上很类似Python最新的字符串格式化语法。
 
 ```py
 greeting = f'Hi {"Mr." if gender == "male" else "Mrs."} {name}'

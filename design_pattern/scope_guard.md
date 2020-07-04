@@ -39,7 +39,7 @@ Scope Guard模式就是对RAII的有效利用。其核心思想是，将资源�
 
 常见的系统资源包括内存、打开的文件和共享锁等，对这些资源的释放都已经有约定俗成的模式，好的C++代码应该考虑采用它们。
 
-使用智能指针，可以免除手动释放堆上资源。
+使用智能指针，消除资源释放代码。
 
 ```cpp
 // DO NOT
@@ -56,7 +56,7 @@ void RAII() {
 }
 ```
 
-使用lock_guard，避免某些分支下，忘记释放锁的尴尬。
+使用lock_guard，避免某些分支下忘记释放锁。
 
 ```cpp
 // mutex to protect concurrent access (shared across threads)
@@ -74,7 +74,7 @@ void RAII () {
 }
 ```
 
-绑定文件句柄到栈对象上，避免手动释放，杜绝资源泄露。
+绑定文件句柄到栈对象上，使用完毕自动关闭文件。
 
 ```cpp
 class ScopeGuard {
