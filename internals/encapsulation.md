@@ -31,7 +31,7 @@ private:
 
 C++标准对数据布局的要求是同一个access level的members，排列需要满足“较晚出现的member拥有较高的地址”。也就是说，members不是非得连续排列，甚至不同access level的数据也可以交叉排列。而成员函数在对象的内存布局中并不存在，它们只存在于代码段中。
 
-![Class and its Data Fields in Memory(without padding)](class.png)
+![Class Point and Memory Layout(without padding)](class.png)
 
 到达汇编语言之后，类这一概念也是不存在的。实际上，类的成员函数和普通函数没有任何区别，编译器会通过安插this指针、重命名等操作，将它们转化为普通函数，从而去掉类这个概念，类似下面这样：
 
