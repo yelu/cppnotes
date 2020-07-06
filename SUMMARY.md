@@ -14,7 +14,7 @@
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
 * [CMake基础](compile_link/cmake_cookbook.md)
 
-## 设计和实现
+## 设计和原理
 
 * [类型](internals/types.md)
 * [对象模型](internals/model.md)
