@@ -214,4 +214,4 @@ target_include_directories(target_b
 
 **1.** 使用CMake为一个Multi-config构建系统生成工程，根据当前配置是Debug还是Release，将编译输出拷贝到不同的目标路径下。
 
-**2.** 某代码在编译阶段需要读取一个系统环境变量，例如BOOST_ROOT。能在`CMakeLists.txt`里面设置该变量吗？如果可以，怎么设置？
+**2.** 某代码在编译阶段需要读取一个系统环境变量，例如BOOST_ROOT。能在`CMakeLists.txt`里面设置该变量吗？为什么？
