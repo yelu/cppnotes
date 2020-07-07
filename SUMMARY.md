@@ -22,7 +22,7 @@
 * [封装](internals/encapsulation.md)
 * [继承](internals/inheritance.md)
 * [多态](internals/polymorphism.md)
-* [左值和右值]()
+* [左值和右值](internals/lvalue_rvalue.md)
 * [模板](internals/template.md)
 
 ## 内存管理

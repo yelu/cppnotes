@@ -1,0 +1,146 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/loose.dtd"> <html class=gr__thbecker_net><!--
+ Page saved with SingleFile 
+ url: http://thbecker.net/articles/rvalue_references/section_02.html 
+ saved date: Sun Jul 14 2019 13:05:52 GMT+0800 (China Standard Time)
+--><meta charset=utf-8>
+<meta http-equiv=PRAGMA content=NO-CACHE>
+<meta http-equiv=CACHE-CONTROL content=NO-CACHE>
+<meta http-equiv=EXPIRES content=-1>
+<title>
+ Page 2 of: C++ Rvalue References Explained (Move Semantics)
+ </title>
+<style>:root{--sf-img-4:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATBAMAAACAfiv/AAAAA3NCSVQICAjb4U/gAAAAJFBMVEUXFBGLiYhDQD7FxMNgXlwmIyCZmZnT09K2tbRRT01mZmb///+i/LAbAAAADHRSTlP//////////////wAS387OAAAACXBIWXMAAAsSAAALEgHS3X78AAAAJXRFWHRTb2Z0d2FyZQBNYWNyb21lZGlhIEZpcmV3b3JrcyBNWCAyMDA0h3aszwAAABZ0RVh0Q3JlYXRpb24gVGltZQAxMC8wMy8wNMevjAkAAABuSURBVHicY9gNBCXVQGIDA5DYHhAOY25iYK2GMhUYGMIhzE0MDCBhEBMoCBIGMkGCIGEgEywIFN7AABEEChcwTIAyGQIYGhdwCS5gFJwwMYFhtwHzbgPu3QLSG/AxgbrQmWzGCTAmxFgQswDGBACJFD6VL3HaIwAAAABJRU5ErkJggg==");--sf-img-5:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATBAMAAACAfiv/AAAAA3NCSVQICAjb4U/gAAAAJFBMVEUXFBFmZmYzMzO2tbSop6VRT00mIyDT09KLiYhDQD5gXlz///+ZzAyDAAAADHRSTlP//////////////wAS387OAAAACXBIWXMAAAsSAAALEgHS3X78AAAAJXRFWHRTb2Z0d2FyZQBNYWNyb21lZGlhIEZpcmV3b3JrcyBNWCAyMDA0h3aszwAAABZ0RVh0Q3JlYXRpb24gVGltZQAxMC8wMy8wNMevjAkAAABWSURBVHicY9gNBF4gYgMDkNjCMBvGdGDghDK3MDCwQZkODAzpECZIsBrChAoCmUBBBtVQIDBgAApCQAMDA4KJJIqkFskEZHORbEN2A5LLkN272xFsAgADZVOKEGYJ+AAAAABJRU5ErkJggg==");--sf-img-6:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATBAMAAACAfiv/AAAAA3NCSVQICAjb4U/gAAAAKlBMVEUXFBFmZmZDQD62tbSop6WLiYjT09JRT00mIyCZmZnFxMNgXlzi4uH///+WA9g9AAAADnRSTlP/////////////////AEXA3MgAAAAJcEhZcwAACxIAAAsSAdLdfvwAAAAldEVYdFNvZnR3YXJlAE1hY3JvbWVkaWEgRmlyZXdvcmtzIE1YIDIwMDSHdqzPAAAAFnRFWHRDcmVhdGlvbiBUaW1lADEwLzAzLzA0x6+MCQAAAHJJREFUeJyVzrEJgDAQRuEnWLiApZBRXMA93MDWESydwM4lxE6EgNglu/hfogOY4vjyCOSIOken4dEIrvy4QZcZHJSZipZFi5bFFJU9OSp7FKvklglqmO2yUdywjKrBNeLa623cozGs6WPju8MfXsNwig/4mV9FIs9c3AAAAABJRU5ErkJggg==");--sf-img-7:url("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABMAAAATBAMAAACAfiv/AAAAA3NCSVQICAjb4U/gAAAAJFBMVEUXFBGLiYgzMzO2tbRRT00mIyCop6Xi4uHT09JgXlxDQD7///8uEj9hAAAADHRSTlP//////////////wAS387OAAAACXBIWXMAAAsSAAALEgHS3X78AAAAJXRFWHRTb2Z0d2FyZQBNYWNyb21lZGlhIEZpcmV3b3JrcyBNWCAyMDA0h3aszwAAABZ0RVh0Q3JlYXRpb24gVGltZQAxMC8wMy8wNMevjAkAAABYSURBVHicY9gNBJXZQGIDA5DYvoANxtzFwJANZZYyMLBBmTsCQMJg5u5WkDCECRbewJDiAgQKQOENDAIMUJCAYDIgi5og1CKZgGoukm1IbkByGZJ7ob4AAKmkUjFQfmRsAAAAAElFTkSuQmCC")}body,td,p,div{font-family:arial,helvetica,sans-serif;font-size:16px}a:focus,a:active{outline:none;-moz-outline-style:none;-webkit-outline-style:none}a{cursor:pointer;color:#2e6e9e;text-decoration:none}a:hover{text-decoration:underline}div.thb-header-and-footer{width:680px;position:relative}div.thb-footer{margin-bottom:15px}div.thb-page-links{position:absolute;top:3px;left:117px}img.thb-follow-me-on-twitter-button{border:0;position:absolute;top:-3px;right:0}div#thb-banner-ad{position:relative;width:100%;height:40px;background:#1d5987 url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAAuCAIAAABmjeQ9AAAACXBIWXMAAAsTAAALEwEAmpwYAAAAB3RJTUUH3QISBgglZfRL2AAAACJ0RVh0Q29tbWVudABDcmVhdGVkIHdpdGggR0lNUCBvbiBhIE1hY4eod0MAAABFSURBVAjXVY3LFYBAEMICldibPdluPOzH9TTwCAPX/RQoWGRqitbQSM3I4uBcPGl052cXqIwbKC7vZPh2tz978/ePcW28upInWCa9Nm8AAAAASUVORK5CYII=) 0 0 repeat-x;-moz-border-radius:5px 5px 5px 5px;-webkit-border-radius:5px 5px 5px 5px;border-radius:5px 5px 5px 5px;margin-top:10px}div#thb-banner-ad div#thb-ad-body{position:absolute;color:#f8fbff}div#thb-banner-ad div#thb-ad-body.thb-ad-body-verbose{top:3px;left:7px;width:445px;font-size:15px;line-height:17px}div#thb-banner-ad div#thb-logo-with-company-name{position:absolute;bottom:0;right:4px}div#thb-banner-ad img{padding:1px 1px 1px 0;margin-right:2px;border:0;-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px;background-color:#f5f8fc}div#thb-banner-ad span.thb-first-part-of-company-name{font-family:"Lucida Grande","Lucida Sans Unicode","Lucida Sans","URW Gothic L",sans-serif;font-weight:bold;color:#f8fbff;font-size:18px;line-height:1em;vertical-align:6px}div#thb-banner-ad span.thb-second-part-of-company-name{font-family:"Lucida Grande","Lucida Sans Unicode","Lucida Sans","URW Gothic L",sans-serif;font-weight:normal;color:#fff;font-size:12px;line-height:1em;vertical-align:6px}</style>
+<link type=image/x-icon rel="shortcut icon" href="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="></head>
+<body lang=EN-US data-gr-c-s-loaded=true data-feedly-mini=yes>
+<div style="margin:0 auto 0 auto;width:680px">
+<a href=http://www.greaterthanzero.com/ target=_blank>
+ <div id=thb-banner-ad>
+ <div id=thb-ad-body class=thb-ad-body-verbose>
+ Had you invested in low-cost index funds instead of doing what you did,
+ would you have more or less? How much more or less?
+ </div>
+ 
+ <div id=thb-logo-with-company-name>
+ <img src=data:image/gif;base64,R0lGODlhFAAWAPcAADk5MTk5OTlCOUJCOUJCQkJKQkpKQkpKSlJSSlJSUlpaUlpaWlpjWmNjWmNjY2trY2tra3Nza3Nzc3N7e3t7e4SEe4SEhISMhIyMjIyUlJSclJycnJylnKWlpaWlraWtra2tra21tbW1tb29vb3GxsbGxs7Ozs7O1s7W1tbW1tbW3tbe3t7e3t7e597n5+fn7+fv7+/v7+/v9+/39/f3//f//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////ywAAAAAFAAWAEAI7QBpCBxIsKBBgTNoJJwRA0KBBCgUSiy40MKBBS0oThwIY8GAABBWLDSxwWOAARAILkxxwAAGhQkGDDAws0NChBI7hFg4kOdNGhI+vtyI82BCGCM6gAgRNMADEzN44kw4woABEDNCyFwAQuaJngotFDiwQmLUg2ZJIHDw0+zGGSgsXPjq0+3PGRw+HoABNmqLESMy4nxRoYBMBxQ8ynQ64q5BwmN3Si2qcIbYAxFNREBwESvlGQ4MLIAx48CAAiginPy6scNYEglXREDsgTRYgRIMHHjR9vZGDQcavHCrknKMBRjOEi0+MIYL5j8DAgA7>
+ <span class=thb-first-part-of-company-name> GreaterThanZero</span><span class=thb-second-part-of-company-name>.com </span>
+ </div>
+ </div>
+</a>
+<hr>
+<a name=top></a>
+<div class=thb-header-and-footer>
+ <a href=http://thbecker.net/home.htm><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19"><rect fill-opacity="0"/></svg>' border=0 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgba(0,0,0,0)!important;background-image:var(--sf-img-4)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a>
+ &nbsp;
+ <a href=http://thbecker.net/articles/rvalue_references/section_01.html><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19"><rect fill-opacity="0"/></svg>' border=0 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgba(0,0,0,0)!important;background-image:var(--sf-img-5)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a>
+ <a href=http://thbecker.net/start_page_showing_articles.html><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19"><rect fill-opacity="0"/></svg>' border=0 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgba(0,0,0,0)!important;background-image:var(--sf-img-6)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_03.html><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19"><rect fill-opacity="0"/></svg>' border=0 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgba(0,0,0,0)!important;background-image:var(--sf-img-7)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a>
+ <div class=thb-page-links>
+ <a href=http://thbecker.net/articles/rvalue_references/section_01.html>1</a>
+ 2
+ <a href=http://thbecker.net/articles/rvalue_references/section_03.html>3</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_04.html>4</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_05.html>5</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_06.html>6</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_07.html>7</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_08.html>8</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_09.html>9</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_10.html>10</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_11.html>11</a>
+ </div>
+</div>
+ 
+<hr>
+<font size=2>
+Page 2 of: <em>Rvalue References Explained</em>,
+by Thomas Becker&nbsp;&nbsp;
+<a href=http://www.greaterthanzero.com/about target=_blank>about me</a>&nbsp;&nbsp;
+<a href=mailto:rvaluereferences@thbecker.net>contact</a>
+</font>
+<h4>
+ Move Semantics
+</h4>
+<table width=680>
+<tbody><tr>
+<td>
+Suppose <code>X</code> is a class that holds a pointer or handle to some resource, say, <code>m_pResource</code>. 
+By a resource, I mean anything that takes considerable effort to construct, clone, or destruct.
+A good example is <code>std::vector</code>, which holds a collection of objects that live in an 
+array of allocated memory. Then, logically, the copy assignment operator for <code>X</code> 
+looks like this:
+<pre>X&amp; X::operator=(X const &amp; rhs)
+{
+  // [...]
+  // Make a clone of what rhs.m_pResource refers to.
+  // Destruct the resource that m_pResource refers to. 
+  // Attach the clone to m_pResource.
+  // [...]
+}
+</pre>
+Similar reasoning applies to the copy constructor. Now suppose <code>X</code> is used as follows:
+<pre>X foo();
+X x;
+// perhaps use x in various ways
+x = foo();
+</pre>
+The last line above
+<ul>
+<li>clones the resource from the temporary returned by <code>foo</code>,
+<li>destructs the resource held by <code>x</code> and replaces it with the clone, 
+<li>destructs the temporary and thereby releases its resource.
+</ul>
+Rather obviously, it would be ok, and much more efficient, to swap resource pointers 
+(handles) between <code>x</code> and the temporary, and then let the temporary's destructor 
+destruct <code>x</code>'s original resource. In other words, in the special case where the right 
+hand side of the assignment is an rvalue, we want the copy assignment operator to act like this:
+ 
+<pre>// [...]
+// swap m_pResource and rhs.m_pResource
+// [...]  
+</pre>
+This is called <em>move semantics</em>.
+With C++11, this conditional behavior can be achieved via an overload:
+<pre>X&amp; X::operator=(&lt;<em>mystery type</em>&gt; rhs)
+{
+  // [...]
+  // swap this-&gt;m_pResource and rhs.m_pResource
+  // [...]  
+}
+</pre>
+<p>
+Since we're defining an overload of the copy assignment operator, our "mystery type" must
+essentially be a reference: we certainly want the right hand side to be passed to 
+us by reference. Moreover, we expect the following behavior of the mystery type:
+when there is a choice between two overloads where one is an ordinary reference and the other is
+the mystery type, then rvalues must prefer the mystery type, while lvalues must prefer the ordinary reference.
+</p>
+If you now substitute "rvalue reference" for "mystery type" in the above, you're essentially looking
+at the definition of rvalue references.
+</td>
+</tr>
+</table>
+<hr>
+<div class="thb-header-and-footer thb-footer">
+ <a href=http://thbecker.net/home.htm><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19"><rect fill-opacity="0"/></svg>' border=0 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgba(0,0,0,0)!important;background-image:var(--sf-img-4)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a>
+ &nbsp;
+ <a href=http://thbecker.net/articles/rvalue_references/section_01.html><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19"><rect fill-opacity="0"/></svg>' border=0 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgba(0,0,0,0)!important;background-image:var(--sf-img-5)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a>
+ <a href=http://thbecker.net/start_page_showing_articles.html><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19"><rect fill-opacity="0"/></svg>' border=0 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgba(0,0,0,0)!important;background-image:var(--sf-img-6)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_03.html><img src='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="19" height="19"><rect fill-opacity="0"/></svg>' border=0 style="background-blend-mode:normal!important;background-clip:content-box!important;background-position:50% 50%!important;background-color:rgba(0,0,0,0)!important;background-image:var(--sf-img-7)!important;background-size:100% 100%!important;background-origin:content-box!important;background-repeat:no-repeat!important"></a>
+ <div class=thb-page-links>
+ <a href=http://thbecker.net/articles/rvalue_references/section_01.html>1</a>
+ 2
+ <a href=http://thbecker.net/articles/rvalue_references/section_03.html>3</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_04.html>4</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_05.html>5</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_06.html>6</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_07.html>7</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_08.html>8</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_09.html>9</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_10.html>10</a>
+ <a href=http://thbecker.net/articles/rvalue_references/section_11.html>11</a>
+ </div>
+ <a href="http://twitter.com/intent/user?screen_name=thomasintahoe" target=_blank>
+ <img src=data:image/png;base64,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 alt="Follow me on Twitter" class=thb-follow-me-on-twitter-button>
+ </a>
+</div>
+</div>
+<div id=feedly-mini title="feedly Mini tookit"></div><span class=gr__tooltip><span class=gr__tooltip-content></span><i class=gr__tooltip-logo></i><span class=gr__triangle></span></span>

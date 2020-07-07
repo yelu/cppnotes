@@ -11,6 +11,7 @@
 
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
 * [CMake基础](compile_link/cmake_cookbook.md)
+* [内部和外部链接](compile_link/intern_static.md)
 
 ## 设计和原理
 
@@ -19,7 +20,7 @@
 * [封装](internals/encapsulation.md)
 * [继承](internals/inheritance.md)
 * [多态](internals/polymorphism.md)
-* [左值和右值]()
+* [左值和右值](internals/lvalue_rvalue.md)
 * [模板](internals/template.md)
 
 ## 内存管理
