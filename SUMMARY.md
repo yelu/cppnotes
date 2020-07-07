@@ -20,13 +20,14 @@
 * [对象模型](internals/model.md)
 * [封装](internals/encapsulation.md)
 * [继承](internals/inheritance.md)
-* [多态]()
+* [多态](internals/polymorphism.md)
 * [左值和右值]()
 
 ## 内存管理
 
-* [堆和栈](memory/unk.md)
+* [堆和栈]()
 * [内存分配器]()
+* [内存泄漏]()
 
 ## 模式和实践
 
@@ -34,5 +35,4 @@
 * [Scope Guard](design_pattern/scope_guard.md)
 * [单例]()
 * [工厂]()
-* [内存泄漏]()
 * [性能优化]()
