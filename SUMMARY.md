@@ -13,7 +13,7 @@
 
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
 * [CMake基础](compile_link/cmake_cookbook.md)
-* [内部和外部链接](compile_link/intern_static.md)
+* [内部和外部链接*](compile_link/intern_static.md)
 
 ## 设计和原理
 
@@ -22,13 +22,13 @@
 * [封装](internals/encapsulation.md)
 * [继承](internals/inheritance.md)
 * [多态](internals/polymorphism.md)
-* [左值和右值](internals/lvalue_rvalue.md)
-* [模板](internals/template.md)
+* [左值和右值*](internals/lvalue_rvalue.md)
+* [模板*](internals/template.md)
 
 ## 内存管理
 
-* [堆和栈]()
-* [内存分配器]()
+* [内存区域*](memory/memory_layout.md)
+* [内存分配器*](memory/allocator.md)
 * [内存泄漏]()
 
 ## 模式和实践
@@ -36,7 +36,7 @@
 * [异常和错误处理](practices/exception.md)
 * [Scope Guard](practices/scope_guard.md)
 * [单例]()
-* [工厂]()
+* [工厂*](practices/factory.md)
 * [性能优化]()
-* [Spin Lock](practices/spin_lock.md)
-* [答面试官](practices/interview_questions.md)
+* [Spin Lock*](practices/spin_lock.md)
+* [答面试官*](practices/interview_questions.md)
