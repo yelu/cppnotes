@@ -14,7 +14,7 @@ std::string
 format_str(const char* format, const T1& t1, const T2& t2);
 ```
 
-使用可变模板参数通常需要利用编译器进行递归展开（meta pragramming常用技巧）。事实上，编译器帮助我们生成了一系列函数，它们接收不同个数的模板参数。
+使用可变参数模板时，通常还会结合利用编译器进行递归展开（meta pragramming常用技巧）。事实上，编译器帮助我们生成了一系列函数，它们分别接收不同个数的模板参数。
 
 ```C++
 template<typename T>
