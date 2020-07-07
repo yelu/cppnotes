@@ -20,6 +20,7 @@
 * [继承](internals/inheritance.md)
 * [多态](internals/polymorphism.md)
 * [左值和右值]()
+* [模板](internals/template.md)
 
 ## 内存管理
 
@@ -29,8 +30,9 @@
 
 ## 模式和实践
 
-* [异常和错误处理](design_pattern/exception.md)
-* [Scope Guard](design_pattern/scope_guard.md)
+* [异常和错误处理](practices/exception.md)
+* [Scope Guard](practices/scope_guard.md)
 * [单例]()
 * [工厂]()
 * [性能优化]()
+* [Spin Lock](practices/spin_lock.md)
