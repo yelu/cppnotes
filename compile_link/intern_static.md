@@ -4,39 +4,39 @@
 
 一个声明将一个名称引入一个作用域，在c++中，在一个作用域中重复一个声明是合法的，以下均为声明：
 
-```c
-    1.int foo(int,int);    //函数前置声明
-    2.typedef int Int;     //typedef 声明
-    3.extern int g_var;    //外部引用声明
-    4.class bar;           //类前置声明
-    5.using std::cout;     //名字空间引用声明
-    6.friend test;         //友员声明
-    有两种声明不能重复，那就是类成员函数及静态数据成员的声明
-    class foo
-    {
-        static int i;
-        static int i;//不可以
-        int foo();
-        int foo();//不可以
-    };
+```cpp
+int foo(int,int);    // 函数前置声明
+typedef int Int;     // typedef 声明
+extern int g_var;    // 外部引用声明
+class bar;           // 类前置声明
+using std::cout;     // 名字空间引用声明
+friend test;         // 友员声明
+// 类成员函数及静态数据成员的声明不能重复
+class foo
+{
+    static int i;
+    static int i; // wrong
+    int foo();
+    int foo(); // wrong
+};
 ```
 
 ## 定义(Definition)
 
 一个定义提供一个实体(类型、实例、函数)在一个作用域的唯一描述。在同一作用域中不可重复定义一个实体，以下都是定义：
 
-```c
-    1.int y;
-    2.static int i;
-    3.extern int i = 10;有初始化值的extern被认为是定义
-    4.const double PI = 3.1415;
-    5.void test(int p) {};
-    6.class foo {...};
-    7.foo a;
-    8.struct bar {...};
-    9.bar b;
-    10.enum Color{RED,GREEN,BLUE};
-    11.union Rep{...};
+```cpp
+int y;
+static int i;
+extern int i = 10; // 有初始化值的extern被认为是定义
+const double PI = 3.1415;
+void test(int p) {};
+class foo {...};
+foo a;
+struct bar {...};
+bar b;
+enum Color{RED,GREEN,BLUE};
+union Rep{...};
 ```
 
 ## 头文件、源文件及编译单元
