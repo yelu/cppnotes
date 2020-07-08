@@ -1,3 +1,0 @@
-/mnt/d/src/github/cppnotes/compile_link/build/CMakeFiles/rebuild_cache.dir
-/mnt/d/src/github/cppnotes/compile_link/build/CMakeFiles/hello_world.dir
-/mnt/d/src/github/cppnotes/compile_link/build/CMakeFiles/edit_cache.dir

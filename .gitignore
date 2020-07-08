@@ -31,3 +31,4 @@
 *.out
 *.app
 hello_world
+build/

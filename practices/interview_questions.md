@@ -1,5 +1,11 @@
 # 答面试官
 
+## enable_shared_from_this
+
+## crt runtime linkage
+
+## [duff's device](http://en.wikipedia.org/wiki/Duff's_device)
+
 ## 整形提升
 
 在一个表达式中，凡是可以使用int或unsigned int类型做右值的地方也都可以使用有符号或无符号的char型、short型和Bit-field。如果原始类型的取值范围都能用int型表示，则其类型被提升为int，如果原始类型的取值范围用int型表示不了，则提升为unsigned int型，这称为Integer Promotion。做Integer Promotion只影响上述几种类型的值，对其它类型无影响。C99规定Integer Promotion适用于以下几种情况：

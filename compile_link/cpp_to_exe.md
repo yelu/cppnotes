@@ -142,3 +142,9 @@ g++ -v -o hello_world hello_world.o
 # remove -lc will result in a linking error. 
 /usr/bin/ld: hello_world.o: undefined reference to symbol 'printf@@GLIBC_2.2.5'
 ```
+
+## 练习
+
+**1.** 阅读[the inside story on shared libraries and dynamic loading](the_inside_story_on_shared_libraries_and_dynamic_loading.pdf).
+
+**2.** 阅读 Chapter 7 of book "Computer Systems A Programmer’s Perspective"

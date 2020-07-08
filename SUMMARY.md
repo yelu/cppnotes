@@ -28,8 +28,8 @@
 ## 内存管理
 
 * [内存区域*](memory/memory_layout.md)
-* [内存分配器*](memory/allocator.md)
-* [内存泄漏]()
+* [内存管理*](memory/memory_management.md)
+* [内存泄漏*](memory/memory_leak.md)
 
 ## 模式和实践
 
@@ -39,4 +39,5 @@
 * [工厂*](practices/factory.md)
 * [性能优化]()
 * [Spin Lock*](practices/spin_lock.md)
+* [插件系统*](practices/plugin_system.md)
 * [答面试官*](practices/interview_questions.md)
