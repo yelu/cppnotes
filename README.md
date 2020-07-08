@@ -11,7 +11,7 @@
 
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
 * [CMake基础](compile_link/cmake_cookbook.md)
-* [内部和外部链接*](compile_link/intern_static.md)
+* [内部和外部链接](compile_link/intern_static.md)
 
 ## 设计和原理
 
@@ -26,8 +26,8 @@
 ## 内存管理
 
 * [内存区域*](memory/memory_layout.md)
-* [内存分配器*](memory/allocator.md)
-* [内存泄漏]()
+* [内存管理*](memory/memory_management.md)
+* [内存泄漏*](memory/memory_leak.md)
 
 ## 模式和实践
 
@@ -37,6 +37,7 @@
 * [工厂*](practices/factory.md)
 * [性能优化]()
 * [Spin Lock*](practices/spin_lock.md)
+* [插件系统*](practices/plugin_system.md)
 * [答面试官*](practices/interview_questions.md)
 
 `*` 尚未整理，仅含一些第三方内容或参考链接。
