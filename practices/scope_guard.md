@@ -1,6 +1,8 @@
 # Scope Guard
 
-资源有申请，就需要有对应的释放。对C++这种没有自动垃圾回收的语言来说，保证资源的申请和释放成对出现，是开发人员要特别关注的问题，否则，就会出现资源泄露。对于高可用的在线服务，问题更加突出，随着时间的推移，丝毫的资源泄露都免不了被累积放大，最终导致资源耗尽，系统崩溃。
+资源有申请，就需要有对应的释放。对C++这种没有自动垃圾回收的语言来说，保证资源的申请和释放成对出现，是开发人员要特别关注的问题，否则，就会出现资源泄露。
+
+对于经常使用C++开发的高可用、高并发的在线服务核心模块来说，资源泄漏问题是致命的。这些模块一旦启动，持续数月甚至数年都不能被停止和重启。随着时间的推移，丝毫的资源泄露都免不了被累积放大，最终难逃资源耗尽、系统崩溃的结局。
 
 ## 资源管理问题
 
@@ -28,7 +30,7 @@ catch() {
 }
 ```
 
-## RAII和资源释放
+## Scope Guard模式
 
 [RAII](https://en.cppreference.com/w/cpp/language/raii)(resource acquisition is initialization)是在1984–1989年，伴随C++中异常安全的资源管理机制，由Bjarne Stroustrup提出的。RAII的核心思路是把系统资源和对象的生命周期绑定：
 
@@ -43,14 +45,14 @@ Scope Guard模式就是对RAII的有效利用。其核心思想是，将资源�
 
 ```cpp
 // DO NOT
-void NoRAII() {
+void NoPointerGuard() {
     Object* obj = new Object();
     ...
     delete obj;
 }
 
 // DO
-void RAII() {
+void PointerGuard() {
     std::unique_ptr<Object> obj = std::make_unique<Object>();
     ...
 }
@@ -62,7 +64,7 @@ void RAII() {
 // mutex to protect concurrent access (shared across threads)
 std::mutex mutex;
 
-void RAII () {
+void LockGuard () {
     // lock mutex before accessing file
     std::lock_guard<std::mutex> lock(mutex);
 
@@ -77,21 +79,21 @@ void RAII () {
 绑定文件句柄到栈对象上，使用完毕自动关闭文件。
 
 ```cpp
-class ScopeGuard {
+class FileGuard {
 public:
-    explicit ScopeGuard(FILE * f):_f(f) {}
-    ~scope_guard_t() { if(_f != NULL) fclose(_f); }
+    explicit FileGuard(FILE * f):_f(f) {}
+    ~FileGuard() { if(_f != NULL) fclose(_f); }
 
 private:
     FILE * _f;
     // noncopyable
-    ScopeGuard(ScopeGuard const&);
-    ScopeGuard& operator=(ScopeGuard const&);
+    FileGuard(FileGuard const&);
+    FileGuard& operator=(FileGuard const&);
 };
 
 int main(){
     File* f = fopen("a.txt", "r");
-    ScopeGuard guard(f);
+    FileGuard guard(f);
 }
 ```
 
