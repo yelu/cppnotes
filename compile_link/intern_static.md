@@ -79,7 +79,7 @@ static int var2 = 20;
 extern int var1;
 ```
 
-当`a.cpp`要用到另一个`common.cpp`中定义的符号var1时（函数同理），就要在`a.cpp`中**声明符号var1**，让编译顺利进行下去。待到链接阶段，链接器会去其它目标文件（common.o）中**查找符号var1的定义**，最终产出可执行程序。期间，出错的结果有两种：没有任何地方定义了var1，或者有多个地方定义了var1，分别代表了两种最常见的链接错误：Unresolved Symbol和Symbol Redefination。
+当`a.cpp`要用到另一个`common.cpp`中定义的符号var1时（函数同理），就要在`a.cpp`中**声明符号var1**，让编译顺利进行下去。待到链接阶段，链接器会去其它目标文件（common.o）中**查找符号var1的定义**，最终产出可执行程序。期间，出错的结果有两种：没有任何地方定义了var1，或者有多个地方定义了var1，分别代表了两种最常见的链接错误：Unresolved Symbol和Symbol Redefinition。
 
 ## 练习
 
