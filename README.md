@@ -38,6 +38,6 @@
 * [性能优化]()
 * [Spin Lock*](practices/spin_lock.md)
 * [插件系统*](practices/plugin_system.md)
-* [答面试官*](practices/interview_questions.md)
+* [答面试官](practices/interview_questions.md)
 
 `*` 尚未整理，仅含一些第三方内容或参考链接。
