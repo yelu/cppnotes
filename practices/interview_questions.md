@@ -2,7 +2,7 @@
 
 ## 整形提升
 
-在表达式中，凡是可以使用int或unsigned int类型做右值的地方也都可以使用有符号或无符号的char、short和Bit-field。如果原始类型的取值范围都能用int型表示，则其类型被提升为int，如果原始类型的取值范围用int型表示不了，则提升为unsigned int型，这称为`Integer Promotion`。C99规定Integer Promotion适用于以下几种情况。
+在表达式中，凡是可以使用int或unsigned int类型做右值的地方也都可以使用有符号或无符号的char、short和bit field。如果原始类型的取值范围都能用int型表示，则其类型被提升为int，如果原始类型的取值范围用int型表示不了，则提升为unsigned int型，这称为`Integer Promotion`。C99规定Integer Promotion适用于以下几种情况。
 
 第一，函数的形参类型未知。例如，使用了Old Style C风格的函数声明，或者函数的参数列表中有`...`，那么调用函数时要对相应的实参做Integer Promotion。此外，实参如果是float型的也要被提升为double型，这条规则称为`Default Argument Promotion`。比如有这样的代码：
 
@@ -13,7 +13,7 @@ char ch = 'A';
 printf("%c", ch);
 ``` 
 
-第二，算术运算中的类型转换。有符号或无符号的char、short和Bit-field在做算术运算之前首先要做Integer Promotion，然后才能参与计算。
+第二，算术运算中的类型转换。有符号或无符号的char、short和bit field在做算术运算之前首先要做Integer Promotion，然后才能参与计算。
 
 ```cpp
 // c1和c2提升会被为int型后再相加。unsigned char的取值范围是0~255，可以用int表示，所以提升为int就可以了，不需要提升为unsigned int。
