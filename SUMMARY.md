@@ -27,7 +27,7 @@
 
 ## 内存管理
 
-* [内存区域*](memory/memory_layout.md)
+* [内存布局*](memory/memory_layout.md)
 * [内存管理*](memory/memory_management.md)
 * [内存泄漏*](memory/memory_leak.md)
 

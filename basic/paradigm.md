@@ -1,6 +1,11 @@
 # 编程范式
 
-“范式”是个使用范围很广的词，指代从事某种活动的“模式”。例如，在政治领域，我们称民主和专制为不同的范式。在经济领域，凯恩斯主义和自由主义是不同的范式。Robert W. Floyd在1978年所作的演讲“The Paradigms of Programming”中，将范式带到了计算机领域。后来，编程范式（Programming Paradigm）这一概念逐渐被用来指代构建程序的不同方式。可以想象，每种编程范式都代表着一种“思想”或者“方法论”，对代码的结构和风格产生影响。
+“范式”是个使用范围很广的词，指代从事某种活动的“模式”。例如，在政治领域，我们称民主和专制为不同的范式。在经济领域，凯恩斯主义和自由主义是不同的范式。1978年ACM Turing Award得主Robert W. Floyd在他的演讲[The Paradigms of Programming](https://dl.acm.org/doi/10.1145/359138.359140)中，将范式带到了计算机领域。
+
+> Today I want to talk about the paradigms of programming, how they affect our success as designers of computer programs, how they should be taught, and how
+they should be embodied in our programming languages.
+
+后来，编程范式（Programming Paradigm）这一概念逐渐被用来指代构建程序的不同方式。可以想象，每种编程范式都代表着一种“思想”或者“方法论”，对代码的结构和风格产生影响。
 
 ## 过程式
 
