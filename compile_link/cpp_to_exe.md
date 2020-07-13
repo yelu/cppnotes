@@ -22,9 +22,14 @@ g++ -c hello_world.cpp
 cl /EHsc hello_world.cpp
 ```
 
-拆解这些步骤有利于理解和解决编译过程中可能面临的错误，也有利于写出高效的C/C++代码。
-
 ![Compile and Link](compile_link.png)
+
+对于理解这一过程的重要性，《Computer System: A Programmer's Perspective》一书在一开始“计算机系统漫游”阶段就指出来了，随后又在“链接”一章详细解释了程序链接和运行的各个细节。
+
+> 对于像hello这样简单的程序，我们可以依靠编译系统生成正确有效的机器代码。但是，有一些重要的原因促使程序员必须知道编译系统是如何工作的。
+> * 优化程序性能。
+> * 理解链接时出现的错误。
+> * 避免安全漏洞。
 
 ## 预处理(Preprocess)
 
@@ -148,6 +153,6 @@ g++ -v -o hello_world hello_world.o
 
 ## 练习
 
-**1.** 阅读[the inside story on shared libraries and dynamic loading](the_inside_story_on_shared_libraries_and_dynamic_loading.pdf).
+**1.** 阅读 Chapter 1 and Chapter 7 of book "Computer Systems A Programmer’s Perspective"
 
-**2.** 阅读 Chapter 7 of book "Computer Systems A Programmer’s Perspective"
+**2.** 阅读[the inside story on shared libraries and dynamic loading](the_inside_story_on_shared_libraries_and_dynamic_loading.pdf).

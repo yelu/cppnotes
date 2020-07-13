@@ -33,7 +33,7 @@ format_str(boost::format& format, const T& t, const Rest&... rest)
 }
 ```
 
-## Traits and policies
+## Traits and Policies
 
 Traits和Policies在一般C++业务代码中并不常见，通常也不需要涉及。而在Template Programming中却被大量使用，在C++标准库中随处可见。
 

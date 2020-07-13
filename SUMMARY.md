@@ -12,8 +12,8 @@
 ## 编译和链接
 
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
-* [CMake基础](compile_link/cmake_cookbook.md)
 * [内部和外部链接](compile_link/intern_static.md)
+* [CMake基础](compile_link/cmake_cookbook.md)
 
 ## 设计和原理
 
@@ -41,4 +41,4 @@
 * [异步IO]()
 * [Spin Lock*](practices/spin_lock.md)
 * [插件系统*](practices/plugin_system.md)
-* [答面试官*](practices/interview_questions.md)
+* [答面试官](practices/interview_questions.md)
