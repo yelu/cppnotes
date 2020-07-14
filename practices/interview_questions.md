@@ -2,7 +2,7 @@
 
 ## Duff's Device
 
-[Duff's device](http://en.wikipedia.org/wiki/Duff's_device)多用于循环展开时，减少循环边界的判断和比较次数，从而提高性能。
+[Duff's device](https://en.wikipedia.org/wiki/Duff%27s_device)多用于循环展开时，减少循环边界的判断和比较次数，从而提高性能。
 
 ```cpp
 void copy(char* from, char* to, int count)
