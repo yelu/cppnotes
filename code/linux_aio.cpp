@@ -196,6 +196,9 @@ public:
     }
 };
 
+
+
+
 #include <vector>
 
 class WriteRequest {
@@ -211,6 +214,7 @@ public:
 
     std::vector<char> buffer;
 };
+
 
 
 
@@ -243,11 +247,6 @@ int main(int argc, char *argv[]) {
     iocb.data = req;
     int res = io_submit(ioctx, 1, &iocb);
     assert(res == 1);
-
-
-
-
-
 
     return 0;
 }
