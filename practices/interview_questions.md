@@ -1,5 +1,27 @@
 # 答面试官
 
+## Duff's Device
+
+[Duff's device](http://en.wikipedia.org/wiki/Duff's_device)多用于循环展开时，减少循环边界的判断和比较次数，从而提高性能。
+
+```cpp
+void copy(char* from, char* to, int count)
+{
+    register int n = (count + 7) / 8;  // gives the number of iterations
+    switch (count % 8) {
+        case 0: do { *to = *from++;
+        case 7:      *to = *from++;
+        case 6:      *to = *from++;
+        case 5:      *to = *from++;
+        case 4:      *to = *from++;
+        case 3:      *to = *from++;
+        case 2:      *to = *from++;
+        case 1:      *to = *from++;
+        } while (--n > 0);
+    }
+}
+```
+
 ## 堆与栈
 
 现代计算机是一行一行串行执行代码的，函数调用、代码跳转和逻辑控制需要利用栈。CPU有专门的寄存器指向栈相关的内存地址，以及专门的机器指令完成数据入栈出栈的操作。
@@ -249,8 +271,6 @@ public:
 
 ## enable_shared_from_this
 
-## crt runtime linkage
-
-## [duff's device](http://en.wikipedia.org/wiki/Duff's_device)
+## CRT Runtime Linkage
 
 ## [Additional FAQ](https://isocpp.org/faq)
