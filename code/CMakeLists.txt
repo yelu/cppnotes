@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 3.16)
 project(code)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 17)
 
-add_executable(code
-        CMakeLists.txt
-        linux_aio.cpp)
+add_executable(code linux_aio.cpp)
+target_link_libraries(code PUBLIC aio pthread)
