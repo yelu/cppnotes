@@ -94,36 +94,34 @@ const通常用于以下两种场合。
 第一，修饰变量或指针，表明变量不能更改。可以替代宏的部分功能，且有类型安全检查。
 
 ```cpp
-// const在前面
-const int var; // var不可修改
-const char* p_var; // *p_var是const, p_var可变
-const (char*) p_var; // p_var是const, *p_var可变
-char* const p_var; // p_var是const, *p_var可变
-const char* const p_var; // p_var和*p_var都是const
+// var不可修改
+const int var; 
+int const var;
 
-// const在后面
-int const var; // var不可修改
-char const* p_var; // *p_var是const, p_var可变
-(char*) const p_var; // p_var是const, *p_var可变
-char* const p_var; // p_var是const, *p_var可变
-char const* const p_var;// p_var和*p_var都是const
+// *p_var是const, p_var可变
+const char* p_var; 
+char const* p_var;
+
+// p_var是const, *p_var可变
+char* const p_var; 
+const (char*) p_var;
+(char*) const p_var;
+char* const p_var;
+
+// p_var和*p_var都是const
+const char* const p_var; 
+char const* const p_var;
 ```
 
 第二，修饰类成员函数。被const修饰的类成员函数不能修改类的成员变量，如果要修改，该成员变量需要使用mutable关键字。
 
-## mutable和volatile关键字
+## [为什么`Foo**` 不能被转换为`const Foo**`?](https://isocpp.org/wiki/faq/const-correctness#constptrptr-conversion)
 
-关键字mutable是一个不常用的关键字，只能用于类的非静态和非常量数据成员。如果一个类的成员函数被声明为const类型，表示该函数不会改变对象的状态，也就是该函数不会修改类的非静态数据成员。但是有些时候需要在该类函数中对类的数据成员进行赋值，这个时候就需要用将该数据成员声明为mutable。
+`Foo*`可以被转换为`const Foo*`，但是`Foo**` 不能被转换为`const Foo **`。
 
-volatile是一个更少用的关键字，该关键字告诉编译器不要持有变量的临时拷贝，例如存在寄存器中的拷贝，而是每次都从内存中读取该变量后再使用。它可以适用于基础类型，也适用于C的struct和C++的class。多线程中共享的状态变量通常需要用valatile来修饰防止编译器优化导致一个线程对变量的更新无法被另外的线程及时读取到。
+`Foo const**` declares a pointer to pointer to const Foo，允许这种转换会导致能够修改一个本来不可以修改的const Foo对象。
 
-A mutable field can be changed even in an object accessed through a const pointer or reference, or in a const object, so the **compiler knows not to store it in R/O(Read Only) memory**. 
-
-A volatile location is one that can be changed by code the compiler doesn't know about (e.g. some kernel-level driver), so **the compiler knows not to optimize**, e.g. register assignment of that value under the invalid assumption that the value "cannot possibly have changed" since it was last loaded in that register. Very different kind of info being given to the compiler to stop very different kinds of invalid optimizations.
-
-## Why am I getting an error converting a Foo** to Foo const**?
-
-[The reason](http://www.parashift.com/c++-faq-lite/constptrptr-conversion.html) why the conversion from `Foo**` to `Foo const**` is dangerous is that it would let you silently and accidentally modify a const Foo object without a cast.
+将`Foo**`转换为`const Foo* const*`则是安全的。`const Foo* const*` declares a pointer to const pointer to const Foo。
 
 ```cpp
 class Foo {
@@ -134,11 +132,21 @@ public:
 int main() {
     const Foo x;
     Foo* p;
-    Foo const** q = &p;  // q now points to p; this is (fortunately!) an error
+    Foo const** q = &p;  // q now points to p; an error! 
     *q = &x;             // p now points to x
     p->modify();         // modify a const Foo!!
 }
 ```
+
+## mutable和volatile关键字
+
+关键字mutable是一个不常用的关键字，只能用于类的非静态和非常量数据成员。如果一个类的成员函数被声明为const类型，表示该函数不会改变对象的状态，也就是该函数不会修改类的非静态数据成员。但是有些时候需要在该类函数中对类的数据成员进行赋值，这个时候就需要用将该数据成员声明为mutable。
+
+volatile是一个更少用的关键字，该关键字告诉编译器不要持有变量的临时拷贝，例如存在寄存器中的拷贝，而是每次都从内存中读取该变量后再使用。它可以适用于基础类型，也适用于C的struct和C++的class。多线程中共享的状态变量通常需要用valatile来修饰防止编译器优化导致一个线程对变量的更新无法被另外的线程及时读取到。
+
+A mutable field can be changed even in an object accessed through a const pointer or reference, or in a const object, so the **compiler knows not to store it in R/O(Read Only) memory**. 
+
+A volatile location is one that can be changed by code the compiler doesn't know about (e.g. some kernel-level driver), so **the compiler knows not to optimize**, e.g. register assignment of that value under the invalid assumption that the value "cannot possibly have changed" since it was last loaded in that register. Very different kind of info being given to the compiler to stop very different kinds of invalid optimizations.
 
 ## static关键字
 
