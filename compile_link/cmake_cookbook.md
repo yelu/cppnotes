@@ -33,7 +33,7 @@ g++ main.cpp -I /path/to/include -L /path/tp/lib -l libbencoding -o foo.exe -std
 * [MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2019), with Microsoft Visual Studio
 * [xcodebuild](https://developer.apple.com/library/archive/technotes/tn2339/_index.html), with Apple Xcode
 
-有了构建系统，编译的流程就变成了提供对应构建系统的配置文件（IDE常称之为工程文件），如`Makefile`(GNU Make)、`.vcproj`(Visual Studio)或`.xcodeproj`(Xcode)，再调用编译系统的命令行间接完成编译。
+有了构建系统，编译的流程就变成了提供对应构建系统的配置文件（IDE常称之为工程文件），如`Makefile`(GNU Make)、`.vcproj`(Visual Studio)或`.xcodeproj`(Xcode)，再调用构建系统的命令行间接完成编译。
 
 ```makefile
 # A Sample Makefile
