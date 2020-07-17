@@ -1,6 +1,6 @@
 # CMake简介
 
-尽管编译代码的核心操作是调用编译器命令行工具（g++等），直接使用它们编译包含大量源代码和依赖的项目还是太复杂了，我们需要更有条理的规范和更方便使用的工具。
+构建可执行程序的核心操作是通过编译器命令行工具（g++等）完成的，但是直接使用它们构建包含大量源代码和依赖的项目还是太复杂了，我们需要更有条理的规范和更方便使用的工具。
 
 在Linux的世界里，从源码编译和安装软件包是件很常见的事。这个过程中，有个[“三部曲”模式](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install)经常被采用：
 
@@ -33,9 +33,10 @@ g++ main.cpp -I /path/to/include -L /path/tp/lib -l libbencoding -o foo.exe -std
 * [MSBuild](https://docs.microsoft.com/en-us/visualstudio/msbuild/msbuild?view=vs-2019), with Microsoft Visual Studio
 * [xcodebuild](https://developer.apple.com/library/archive/technotes/tn2339/_index.html), with Apple Xcode
 
-有了构建系统，编译的流程就变成了提供对应构建系统的配置文件（IDE常称之为工程文件），例如Makefile(GNU Make)、vcproj(Visual Studio)或xcodeproj(Xcode)，再调用编译系统提供的命令，如`make clean; make`等间接完成编译。
+有了构建系统，编译的流程就变成了提供对应构建系统的配置文件（IDE常称之为工程文件），如`Makefile`(GNU Make)、`.vcproj`(Visual Studio)或`.xcodeproj`(Xcode)，再调用编译系统的命令行间接完成编译。
 
 ```makefile
+# A Sample Makefile
 PROG=prog
 CC=g++
 CPPFLAGS=–I/home/tom/prog/include
@@ -47,6 +48,17 @@ main.o :
     $(CC) $(CPPFLAGS) -c main.cpp
 clean:
     rm -f $(PROG) $(OBJS)
+```
+
+```bash
+# GNU Make
+make clean && make
+
+# MSBuild
+msbuild.exe projectname.proj /property:Configuration=Release
+
+# xcodebuild
+xcodebuild -scheme project_schema -project projectname.xcworkspace/ build
 ```
 
 CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需配置文件的工具**。CMake目前支持市面上几乎所有常用的，或基于命令行或基于IDE的构建系统。
