@@ -58,10 +58,10 @@ make clean && make
 msbuild.exe projectname.proj /property:Configuration=Release
 
 # xcodebuild
-xcodebuild -scheme project_schema -project projectname.xcworkspace/ build
+xcodebuild -scheme project_schema -project projectname.xcodeproj build
 ```
 
-CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需配置文件的工具**。CMake目前支持市面上几乎所有常用的，或基于命令行或基于IDE的构建系统。
+CMake这时的出现提供了又一层更高的抽象，它能以统一的语法生成不同构建系统需要的配置文件，因此，CMake被称为**Build System Generator**。这是个准确且重要的名字：它不是编译工具，也不是构建系统，而是一个**生成构建系统所需配置文件的工具**。CMake支持市面上几乎所有常见的命令行或图形IDE构建系统。
 
 ![Stack of Build Tools](cmake_stack.png)
 
@@ -94,9 +94,9 @@ CMake的语法从很多方面看，都挺灾难的。首先，它的语法对大
 
 ## Modern CMake is Built on Targets
 
-target是现代CMake的核心概念，一个target就是一个具体的编译目标，即一个静态库(lib)、动态库(so/dll)或可执行程序。每个target有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。
+Target是现代CMake的核心概念，一个Target就是一个具体的编译目标，即一个静态库(.lib/.a)、动态库(.so/.dll)或可执行程序。每个Target有自己的附属信息，包括头文件查找路径、链接的其它目标、编译参数和链接参数等。这些信息是通过一组以`target_`开头的命令指定的。
 
-target和target之间的依赖则通过`target_link_libraries`命令定义，整个CMake工作流程的基础就是据此建立的target之间的依赖关系。这种方式和Package管理系统很类似，以Python为例，target就像pip包，target之间的依赖就像通过requirements.txt指定的pip依赖包列表，依赖关系构成了一个有向无环图。
+Target和Target之间的依赖则通过`target_link_libraries`命令定义，整个CMake工作流程的基础就是据此建立的Target之间的依赖关系。这种方式和Package管理系统很类似，以Python为例，Target就像pip包，Target之间的依赖就像通过requirements.txt指定的pip依赖包列表，依赖关系构成了一个有向无环图。
 
 ```cmake
 add_executable(hello helloworld.cpp)
