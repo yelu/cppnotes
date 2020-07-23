@@ -2,7 +2,7 @@
 
 构建可执行程序的核心操作是通过编译器命令行工具（g++等）完成的，但是直接使用它们构建包含大量源代码和依赖的项目还是太复杂了，我们需要更有条理的规范和更方便使用的工具。
 
-在Linux的世界里，从源码编译和安装软件包是件很常见的事。这个过程中，有个[“三部曲”模式](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install)经常被采用：
+在Linux的世界里，从源码编译和安装软件包时，有个[“三部曲”模式](https://thoughtbot.com/blog/the-magic-behind-configure-make-make-install)经常被采用：
 
 ```bash
 ./configure --prefix=/usr/local/bin/
@@ -14,11 +14,11 @@ make install
 
 Kitware的开发人员将这一模式“发扬光大”，做了诸多增强和改进，在2000年前后发布了CMake这个跨平台的编译系统生成工具(Build System Generator)。Kitware目前仍负责维护CMake，代码本身采用社区开源模式管理，免费使用，Kitware提供商业的培训和技术支持。
 
-相比IT产业技术更迭的速度，CMake已经算很古老的项目了。随之可以想象的是，它给人一种历史带来的晦涩感。但是一路走来，在C/C++编译方面，CMake做的尽管不是尽善尽美，却也还是最好的那个。喜欢还是不喜欢，它都已经成为一种事实标准，不仅绝大多数新的C++项目采用CMake编译，很多老项目也在逐步迁移到它上面来。
+相比于互联网技术更迭的速度，CMake已经算很古老的项目了。随之可以想象的是，它给人一种历史带来的晦涩感。但是一路走来，在C/C++编译方面，CMake做的尽管不是尽善尽美，却也还是最好的那个。喜欢还是不喜欢，它都已经成为一种事实标准，不仅绝大多数新的C++项目采用CMake编译，很多老项目也在逐步迁移到它上面来。
 
 ## 编译工具栈
 
-编译C/C++，说到底，最终还是靠编译器程序外加一长串命令行配置项和开关完成的。根据平台和喜好，可选的编译工具链(Toolchain)有很多，例如：
+编译C/C++，说到底还是靠编译器程序外加一长串命令行参数和开关完成的。根据平台和喜好，可选的编译工具链(Toolchain)有很多，例如：
 * [GNU gcc/g++](https://gcc.gnu.org/)
 * [MSVC](https://docs.microsoft.com/en-us/cpp/build/reference/compiling-a-c-cpp-program?view=vs-2019), Windows only
 * [Clang](https://clang.llvm.org/get_started.html)
