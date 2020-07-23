@@ -168,9 +168,11 @@ cmake --build build
 
 ## Generator Expression
 
-[generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)是一个晦涩难懂，却又得经常使用的特性。
+[generator expression](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)是一个晦涩难懂，却又得经常使用的特性。关于这个概念，经常能见到的解释是，它是在generate阶段而不是configure阶段求值的，有更多的信息，因此可以做到更多。这种解释需要被正确认识。首先，它几乎没有为如何正确使用它提供有效信息，也就是没啥意义。其次，它更像是某种具体实现策略，而不是设计动机。它诡异的语法也让人觉得它似乎不是个一开始就被放进设计并被精心实现的特性。
 
-关于generator expression，首先要解答的问题是它为什么存在，它能做什么，没它不行吗？让我们跟随一个具体需求一步步走走看：在编译目标文件产生之后，把它们拷贝到自定义目标路径中去。如果是Debug build，目标路径为安装路径下的debug子目录，如果不是Debug build，直接拷贝到安装路径。
+所以，理解generator expression的正确方式之一是不去理解它，而是看看它的典型使用场景有哪些，用和不用的区别在哪，在应该使用的时候能够想起它。花时间去理解它没有太大意义，这只是一个人为设计的规则。
+
+以下是一个判断当前构建配置是什么的具体需求。我们想在编译目标文件产生之后，把它们拷贝到自定义目标路径。如果是Debug配置，目标路径为安装路径下的debug子目录，否则直接拷贝到安装路径。
 
 ```cmake
 if (CMAKE_BUILD_TYPE EQUAL "Debug")
@@ -190,11 +192,11 @@ endif ()
 
 对于Single-config的GNU makefile，以上做法没任何问题，完全能够达到目的。除此之外，问题有二。
 
-第一，太啰嗦，重复了两遍类似的代码。
+第一，对于Multi-config的Visual Studio，达不到想要的目的。CMakeLists.txt文件早在configure阶段就已经被解释执行了，而Debug/Release是直到generate阶段产生工程文件时才能确定下来的。因此，CMAKE_BUILD_TYPE这个变量对Multi-config构建系统无效，始终为空。
 
-第二，对于Multi-config的Visual Studio，达不到想要的目的。CMakeLists.txt文件早在configure阶段就已经被解释执行了，而Debug/Release是直到generate阶段产生工程文件时才能确定下来的。因此，CMAKE_BUILD_TYPE这个变量对Multi-config构建系统无效。
+第二，太啰嗦，重复了两遍类似的代码。
 
-generator expression可以同时解决以上两个问题。`$<$<CONFIG:Debug>:debug>`在Debug build时evaluate为debug，否则为空。这个实现还同时支持Single-config和Multi-config构建系统。
+generator expression可以同时解决以上两个问题。`$<$<CONFIG:Debug>:debug>`在Debug配置时evaluate为debug，否则为空。这个实现同时支持Single-config和Multi-config构建系统。
 ```cmake
 add_custom_command(
     TARGET target_b POST_BUILD
@@ -203,17 +205,17 @@ add_custom_command(
             ${CMAKE_INSTALL_PREFIX}/target_b/$<$<CONFIG:Debug>:debug>)
 ```
 
-对比以上两种写法，generator expression提供的价值总结为两点。
+对比以上两种写法，generator expression提供的价值直观看起来是两点。
 
-第一，将分支判断表达式直接写在需要其执行结果的地方，消除一些冗余代码。这点上很类似Python最新的字符串格式化语法。
+第一，提供了延迟求值能力。在configure阶段，表达式不会被求值，而是推迟到后续有更多信息的generate阶段。
+
+第二，将分支判断表达式直接写在需要其执行结果的地方，消除一些冗余代码。这点上很类似Python最新的字符串格式化语法。
 
 ```py
 greeting = f'Hi {"Mr." if gender == "male" else "Mrs."} {name}'
 ```
 
-第二，提供了延迟求值功能。在configure阶段，表达式不会被求值，而是推迟到后续有更多信息的generate阶段。
-
-generator expression可做的事情还有很多，其中比较常用的另一例是，方便地实现conditional include或linking。至于generator expression的语法规则及功能列表，非本节之志向，还请移步[generator expression文档](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。
+generator expression可做的事情中另一个比较常见的是，方便地实现conditional include或linking。
 
 ```cmake
 # RapidJSON_INCLUDE_DIR仅在源码编译时需要被查找
@@ -223,6 +225,8 @@ target_include_directories(target_b
         $<BUILD_INTERFACE:${RapidJSON_INCLUDE_DIR}>
         $<INSTALL_INTERFACE:include>)
 ```
+
+至于generator expression可用的上下文，有哪些变量和语法，还请移步[generator expression文档](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)。
 
 ## PUBLIC PRIVATE INTERFACE
 

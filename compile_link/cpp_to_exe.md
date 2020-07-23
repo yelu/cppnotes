@@ -153,6 +153,6 @@ g++ -v -o hello_world hello_world.o
 
 ## 练习
 
-**1.** 阅读 Chapter 1 and Chapter 7 of book "Computer Systems A Programmer’s Perspective"
+**1.** 阅读 Chapter 1 and Chapter 7 of book "Computer Systems A Programmer’s Perspective".
 
 **2.** 阅读[the inside story on shared libraries and dynamic loading](the_inside_story_on_shared_libraries_and_dynamic_loading.pdf).
