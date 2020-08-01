@@ -1,6 +1,6 @@
 # 从源代码到可执行程序
 
-很多人的C++之旅或许是从书上的Hello World程序开始的，通过点击CLion或者Visual Studio的一些按钮很快就能成功打印出“hello world”。在背后，IDE是通过调用具体的编译命令行程序（g++、Clang等）完成工作的。
+很多人的C++之旅或许是从书上的Hello World程序开始的，通过点击Visual Studio或者CLion的一些按钮很快就能成功打印出“hello world”。在背后，IDEs是通过调用具体的编译器命令行(msvc、g++等)完成工作的。
 
 ```cpp
 #include <iostream>
@@ -153,6 +153,8 @@ g++ -v -o hello_world hello_world.o
 
 ## 练习
 
-**1.** 阅读 Chapter 1 and Chapter 7 of book "Computer Systems A Programmer’s Perspective".
+**1.** 如何导出一个定义在动态链接库中的类供外部使用？你的方式在不同编译器和平台之间兼容性如何？
 
-**2.** 阅读[the inside story on shared libraries and dynamic loading](the_inside_story_on_shared_libraries_and_dynamic_loading.pdf).
+**2.** 阅读 Chapter 1 and Chapter 7 of book "Computer Systems A Programmer’s Perspective".
+
+**3.** 阅读[the inside story on shared libraries and dynamic loading](the_inside_story_on_shared_libraries_and_dynamic_loading.pdf).
