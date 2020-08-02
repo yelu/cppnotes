@@ -250,7 +250,7 @@ Build properties of PUBLIC and INTERFACE dependencies are propagated to consumin
 
 `SET(CMAKE_VERBOSE_MAKEFILE ON CACHE BOOL "Makefile log verbose")` and look into the gcc/ld command line.
 
-**5.** 额外阅读资源
+**5.** 额外阅读
 
 * [It's Time To Do CMake Right](https://pabloariasal.github.io/2018/02/19/its-time-to-do-cmake-right/)
 * Best video: [Effective cmake](https://youtu.be/rLopVhns4Zs)
