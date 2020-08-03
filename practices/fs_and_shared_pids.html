@@ -1,0 +1,118 @@
+<html class=gr__lkml_iu_edu><!--
+ Page saved with SingleFile 
+ url: http://lkml.iu.edu/hypermail/linux/kernel/9608/0191.html 
+ saved date: Thu Oct 24 2019 16:22:42 GMT+0800 (China Standard Time)
+--><meta charset=utf-8><title>Linux-Kernel Archive: Re: proc fs and shared pids</title>
+<link type=image/x-icon rel="shortcut icon" href="data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw=="><body data-gr-c-s-loaded=true data-feedly-mini=yes><h1>Re: proc fs and shared pids</h1>
+Linus Torvalds (<i>torvalds@cs.helsinki.fi</i>)<br>
+<i>Tue, 6 Aug 1996 12:47:31 +0300 (EET DST)</i>
+<p>
+<ul>
+<li> <b>Messages sorted by:</b> <a href=http://lkml.iu.edu/hypermail/linux/kernel/9608/date.html#191>[ date ]</a><a href=http://lkml.iu.edu/hypermail/linux/kernel/9608/index.html#191>[ thread ]</a><a href=http://lkml.iu.edu/hypermail/linux/kernel/9608/subject.html#191>[ subject ]</a><a href=http://lkml.iu.edu/hypermail/linux/kernel/9608/author.html#191>[ author ]</a>
+<li> <b>Next message:</b> <a href=http://lkml.iu.edu/hypermail/linux/kernel/9608/0192.html>Bernd P. Ziller: "Re: Oops in get_hash_table"</a>
+<li> <b>Previous message:</b> <a href=http://lkml.iu.edu/hypermail/linux/kernel/9608/0190.html>Linus Torvalds: "Re: I/O request ordering"</a>
+</ul>
+<hr>
+On Mon, 5 Aug 1996, Peter P. Eiserloh wrote:<br>
+<i>&gt; </i><br>
+<i>&gt; We need to keep a clear the concept of threads. Too many people</i><br>
+<i>&gt; seem to confuse a thread with a process. The following discussion</i><br>
+<i>&gt; does not reflect the current state of linux, but rather is an</i><br>
+<i>&gt; attempt to stay at a high level discussion.</i><br>
+<p>
+NO!<br>
+<p>
+There is NO reason to think that "threads" and "processes" are separate<br>
+entities. That's how it's traditionally done, but I personally think it's a<br>
+major mistake to think that way. The only reason to think that way is<br>
+historical baggage. <br>
+<p>
+Both threads and processes are really just one thing: a "context of<br>
+execution". Trying to artificially distinguish different cases is just<br>
+self-limiting. <br>
+<p>
+A "context of execution", hereby called COE, is just the conglomerate of <br>
+all the state of that COE. That state includes things like CPU state <br>
+(registers etc), MMU state (page mappings), permission state (uid, gid) <br>
+and various "communication states" (open files, signal handlers etc).<br>
+<p>
+Traditionally, the difference between a "thread" and a "process" has been<br>
+mainly that a threads has CPU state (+ possibly some other minimal state),<br>
+while all the other context comes from the process. However, that's just<br>
+_one_ way of dividing up the total state of the COE, and there is nothing<br>
+that says that it's the right way to do it. Limiting yourself to that kind of<br>
+image is just plain stupid. <br>
+<p>
+The way Linux thinks about this (and the way I want things to work) is that<br>
+there _is_ no such thing as a "process" or a "thread". There is only the<br>
+totality of the COE (called "task" by Linux). Different COE's can share parts<br>
+of their context with each other, and one _subset_ of that sharing is the<br>
+traditional "thread"/"process" setup, but that should really be seen as ONLY<br>
+a subset (it's an important subset, but that importance comes not from<br>
+design, but from standards: we obviusly want to run standards-conforming<br>
+threads programs on top of Linux too). <br>
+<p>
+In short: do NOT design around the thread/process way of thinking. The <br>
+kernel should be designed around the COE way of thinking, and then the <br>
+pthreads _library_ can export the limited pthreads interface to users who <br>
+want to use that way of looking at COE's.<br>
+<p>
+Just as an example of what becomes possible when you think COE as opposed <br>
+to thread/process:<br>
+<p>
+ - You can do a external "cd" program, something that is traditionally<br>
+ impossible in UNIX and/or process/thread (silly example, but the idea <br>
+ is that you can have these kinds of "modules" that aren't limited to <br>
+ the traditional UNIX/threads setup). Do a:<br>
+<p>
+ clone(CLONE_VM|CLONE_FS);<br>
+ child: execve("external-cd");<br>
+ /* the "execve()" will disassociate the VM, so the only reason we <br>
+ used CLONE_VM was to make the act of cloning faster */<br>
+<p>
+ - You can do "vfork()" naturally (it meeds minimal kernel support, but <br>
+ that support fits the CUA way of thinking perfectly):<br>
+<p>
+ clone(CLONE_VM);<br>
+ child: continue to run, eventually execve()<br>
+ mother: wait for execve<br>
+<p>
+ - you can do external "IO deamons":<br>
+<p>
+ clone(CLONE_FILES);<br>
+ child: open file descriptors etc<br>
+ mother: use the fd's the child opened and vv.<br>
+<p>
+All of the above work because you aren't tied to the thread/process way of<br>
+thinking. Think of a web server for example, where the CGI scripts are done<br>
+as "threads of execution". You can't do that with traditional threads,<br>
+because traditional threads always have to share the whole address space, so<br>
+you'd have to link in everything you ever wanted to do in the web server<br>
+itself (a "thread" can't run another executable). <br>
+<p>
+Thinking of this as a "context of execution" problem instead, your tasks can<br>
+now chose to execute external programs (= separate the address space from the<br>
+parent) etc if they want to, or they can for example share everything with<br>
+the parent _except_ for the file descriptors (so that the sub-"threads" can<br>
+open lots of files without the parent needing to worry about them: they close<br>
+automatically when the sub-"thread" exits, and it doesn't use up fd's in the<br>
+parent). <br>
+<p>
+Think of a threaded "inetd", for example. You want low overhead fork+exec, so<br>
+with the Linux way you can instead of using a "fork()" you write a<br>
+multi-threaded inetd where each thread is created with just CLONE_VM (share<br>
+address space, but don't share file descriptors etc). Then the child can<br>
+execve if it was a external service (rlogind, for example), or maybe it was<br>
+one of the internal inetd services (echo, timeofday) in which case it just<br>
+does it's thing and exits. <br>
+<p>
+You can't do that with "thread"/"process".<br>
+<p>
+ Linus<br>
+<hr>
+<p>
+<ul>
+<li> <b>Next message:</b> <a href=http://lkml.iu.edu/hypermail/linux/kernel/9608/0192.html>Bernd P. Ziller: "Re: Oops in get_hash_table"</a>
+<li> <b>Previous message:</b> <a href=http://lkml.iu.edu/hypermail/linux/kernel/9608/0190.html>Linus Torvalds: "Re: I/O request ordering"</a>
+</ul>
+<div id=feedly-mini title="feedly Mini tookit"></div>
