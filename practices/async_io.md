@@ -307,40 +307,10 @@ int main(int argc, char* argv[])
 
 关于协程，还有很多值得思考的，我们把它放在附录二中。
 
-### 附一 service开发值得注意的细节
+## Socket网络编程值得注意的细节
 
-#### TIME_WAIT
+### TIME_WAIT
 
-#### 信号屏蔽
+### 信号屏蔽
 
-#### 句柄资源回收
-
-### 附录二 协程（corotinue）
-
-#### 协作式多线程调度
-
-现代大多数内核中实现的多线程调度方式是抢占式，操作系统要兼顾公平性，如果某个线程消耗了较多的CPU时间，即使没有阻塞操作，也需要把CPU让给其它线程。而协程则不是，他将线程切换的控制权交给了使用者，只在执行可能阻塞的操作（例如IO）时，才将CPU让出，避免了很多不必要的切换。而这种切换由语言本身来实现。对比事件异步事件机制来看，它其实是将调度、切换工作交由开发者，带来了复杂性。
-
-#### yield
-
-在并发阻塞IO操作时使用协程，仅仅是协程的一个应用例子。它本质上是一种协作式多线程调度机制，其思路可以应用在其它地方。例如yield，该关键字在Python、C#等中都有实现。在python中，使用yield的生成器(generator)可以很方便地实现迭代器。
-
-```Python
->>> def CreateIterator(l):
-...    for i in l:
-...        yield i*i
-...
->>> iter = CreateIterator([0, 1, 2]) # create a generator
->>> for i in iter:
-...     print(i)
-0
-1
-4
-```
-
-我们可以使用协程来实现yield，尽管python可能不是这样做的：
-
-* 在CreateIterator时新建一个子协程，每次进入for循环时，将程序执行流从主协程切换到子协程。
-* 子协程接着上次的状态继续运行，在yield处暂停执行，将控制权重新交给交给主协程，并返回一个数字。
-
-[boost::context](http://www.boost.org/doc/libs/1_57_0/libs/context/doc/html/index.html)也对实现协程提供了支持，其实现方式是保存多条执行路径的栈和寄存器。
+### 句柄资源回收
