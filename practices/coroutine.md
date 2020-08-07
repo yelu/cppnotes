@@ -79,27 +79,9 @@ private:
 
 Erlang的并发思想在go语言身上重新焕发了生机。Go的设计目标之一就是原生支持高并发，以降低开发高并发服务的困难。Go采用了接近于协程的思路，而不是异步事件回调。它提供的goroutine可以被近乎无限地创建，由语言来负责高效地管理和切换。
 
-## POSIX AIO and Kernel AIO
-
-* [Linux AIO](https://github.com/littledan/linux-aio)
-
-On linux, the two AIO implementations are [fundamentally different](https://stackoverflow.com/questions/8768083/difference-between-posix-aio-and-libaio-on-linux).
-
-The POSIX AIO is a user-level implementation that performs normal blocking I/O in multiple threads, hence giving the illusion that the I/Os are asynchronous. The main reason to do this is that:
-
-* it works with any filesystem
-* it works (essentially) on any operating system (keep in mind that gnu's libc is portable)
-* it works on files with buffering enabled (i.e. no O_DIRECT flag set)
-
-The main drawback is that your queue depth (i.e. the number of outstanding operations you can have in practice) is limited by the number of threads you choose to have, which also means that a slow operation on one disk may block an operation going to a different disk. It also affects which I/Os (or how many) is seen by the kernel and the disk scheduler as well.
-
-The kernel AIO (i.e. io_submit() et.al.) is kernel support for asynchronous I/O operations, where the io requests are actually queued up in the kernel, sorted by whatever disk scheduler you have, presumably some of them are forwarded (in somewhat optimal order one would hope) to the actual disk as asynchronous operations (using TCQ or NCQ). The main restriction with this approach is that not all filesystems work that well or at all with async I/O (and may fall back to blocking semantics), files have to be opened with O_DIRECT which comes with a whole lot of other restrictions on the I/O requests. If you fail to open your files with O_DIRECT, it may still "work", as in you get the right data back, but it probably isn't done asynchronously, but is falling back to blocking semantics.
-
-Also keep in mind that io_submit() can actually block on the disk under certain circumstances.
-
 ## 附I 《面向软件错误构建可靠的分布式系统》
 
-Joe amstrang在他的博士论文[Making Reliable Distributed Systems in the Presence of  Software Errors](./Refs/joe_armstrong_making_reliable_distributed_systems_in_the_presence_of_software_errors.pdf)中对Erlang的设计哲学给出了阐释，总结起来，有三个重点。
+Joe amstrang在他的博士论文[Making Reliable Distributed Systems in the Presence of Software Errors](joe_armstrong_making_reliable_distributed_systems_in_the_presence_of_software_errors.pdf)中对Erlang的设计哲学给出了阐释，总结起来，有三个重点。
 
 **第一，故障隔离。**
 

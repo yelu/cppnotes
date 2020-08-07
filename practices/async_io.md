@@ -295,7 +295,7 @@ int main(int argc, char* argv[])
 
 相比本文之初简单的同步阻塞IO模型，事件循环+回调的方式虽然提高了代码效率，但代码的复杂度也增加不少。同步阻塞模式就像我们亲自开飞机，根据现场情况，我们边飞边处理。而异步回调机制要求我们在地面上先设计一个无人机，事先针对现场可能出现的情况设计一套完善的处理流程（编织出一个回掉函数调用关系网），之后让它自己起飞（启动select/epoll等IO多路复用器）。一系列现场事件在复杂的回掉函数关系网中激活一条执行路径，难度显然更大一些。如果再加上严谨的错误处理、引入IO超时机制，回调过程中资源申请和释放的安全性，回调关系网会非常复杂。
 
-## 协程
+## 使用协程
 
 到目前为止，我们提高并发能力的思路是这样的：
 
@@ -305,8 +305,6 @@ int main(int argc, char* argv[])
 
 有没有能兼顾开发效率和执行效率的方案呢？这个疑问引出了另一个高并发实现思路：使用协程(corotinue)。
 
-关于协程，还有很多值得思考的，我们把它放在附录二中。
-
 ## Socket网络编程值得注意的细节
 
 ### TIME_WAIT
@@ -314,3 +312,23 @@ int main(int argc, char* argv[])
 ### 信号屏蔽
 
 ### 句柄资源回收
+
+## POSIX AIO and Kernel AIO
+
+* [Linux AIO](https://github.com/littledan/linux-aio)
+
+On linux, the two AIO implementations are [fundamentally different](https://stackoverflow.com/questions/8768083/difference-between-posix-aio-and-libaio-on-linux).
+
+The POSIX AIO is a user-level implementation that performs normal blocking I/O in multiple threads, hence giving the illusion that the I/Os are asynchronous. The main reason to do this is that:
+
+* it works with any filesystem
+* it works (essentially) on any operating system (keep in mind that gnu's libc is portable)
+* it works on files with buffering enabled (i.e. no O_DIRECT flag set)
+
+The main drawback is that your queue depth (i.e. the number of outstanding operations you can have in practice) is limited by the number of threads you choose to have, which also means that a slow operation on one disk may block an operation going to a different disk. It also affects which I/Os (or how many) is seen by the kernel and the disk scheduler as well.
+
+The kernel AIO (i.e. io_submit() et.al.) is kernel support for asynchronous I/O operations, where the io requests are actually queued up in the kernel, sorted by whatever disk scheduler you have, presumably some of them are forwarded (in somewhat optimal order one would hope) to the actual disk as asynchronous operations (using TCQ or NCQ). The main restriction with this approach is that not all filesystems work that well or at all with async I/O (and may fall back to blocking semantics), files have to be opened with O_DIRECT which comes with a whole lot of other restrictions on the I/O requests. If you fail to open your files with O_DIRECT, it may still "work", as in you get the right data back, but it probably isn't done asynchronously, but is falling back to blocking semantics.
+
+Also keep in mind that io_submit() can actually block on the disk under certain circumstances.
+
+关于协程，还有很多值得思考的，我们把它放在附录二中。
