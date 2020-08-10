@@ -1,7 +1,11 @@
-cmake_minimum_required(VERSION 3.16)
-project(code)
-
+cmake_minimum_required(VERSION 3.10)
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+project(cppnotes)
+
+add_executable(obj_model move_constructor.cpp)
+target_include_directories(obj_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 add_executable(code linux_aio.cpp)
 target_link_libraries(code PUBLIC aio pthread)
