@@ -2,11 +2,11 @@
 
 由于磁盘、网卡等输入输出设备和CPU的处理速度不匹配，异步IO是程序处理输入输出的常用模式。CPU发起IO请求之后并不等待执行完成，而是继续其它操作，设备在IO操作完成之后通知发起线程IO请求完成。
 
-常见的IO操作有两类：磁盘IO和网络IO。基于Linux一切都是文件的哲学，对应用层代码而言，从磁盘和网络读写数据，都是调用内核函数对文件句柄进行读写。不过存取磁盘数据和处理网络请求毕竟是不同的，相应的编程模式也会有所区别。
+常见的IO操作有两类：磁盘IO和网络IO。基于Linux一切都是文件的哲学，多数处理IO的系统调用都能兼顾磁盘文件和网络设备读写。不过，存取磁盘数据和处理网络请求毕竟是不同的，内核(尤其是Linux)对它们的抽象封装还在改进当中，相应的编程模式还是有所区别。
 
-## 网络IO模型
+## Socket网络编程
 
-在计算机网络中，使用最为广泛的通信协议是TCP/IP协议簇。进程间通信采用的是客户端/服务器模型，运行在客户端和服务器端主机应用层的程序通过建立点对点的连接来实现通信，连接的端点称为[网络Socket](http://en.wikipedia.org/wiki/Network_socket)，它由网络层的IP地址和传输层的TCP(UDP)端口组成。一个连接由通信两端的Socket对唯一确定，这对Socket称为套接字对，由一个二元组表示。服务器和客户端通过对各自Socket的读写实现数据的收发。
+在计算机网络中，使用最为广泛的通信协议是TCP/IP协议簇。进程间通信采用的是客户端/服务器模型，运行在客户端和服务器端主机应用层的程序通过建立点对点的连接来实现通信，连接的端点称为[socket](http://en.wikipedia.org/wiki/Network_socket)，它由网络层的IP地址和传输层的TCP(UDP)端口组成。一个连接由通信两端的socket对唯一确定，这对socket称为套接字对，由一个二元组表示。服务器和客户端通过对各自socket的读写实现数据的收发。
 
 ```
 (ClientAddr:ClientPort, ServerAddr:ServerPort)
@@ -14,7 +14,7 @@
     
 ![Hardware and Software Organization of Internet Application](./HardwareAndSoftwareOrganizationOfInternetApplication.png)
 
-操作Socket的一组最有名的API是[Berkeley Socket APIs](http://en.wikipedia.org/wiki/Berkeley_sockets#Socket_API_functions)。它最早于1983年在BSD Unix 4.2上发布。然而，由于AT&T的专利保护着UNIX，到1989年Berkeley大学才能够自由地发布它们。其设计简单、实用，后来逐渐成为了网络socket操作的事实标准。包含的主要函数有：
+操作socket的一组最有名的API是[Berkeley socket APIs](http://en.wikipedia.org/wiki/Berkeley_sockets#Socket_API_functions)。它最早于1983年在BSD Unix 4.2上发布。然而，由于AT&T的专利保护着UNIX，到1989年Berkeley大学才能够自由地发布它们。其设计简单、实用，后来逐渐成为了网络socket操作的事实标准。包含的主要函数有：
 
 * socket()
 * bind()/listen()/accept(). Used on the server side.
@@ -72,7 +72,7 @@ close(conn_fd);
 
 ## I/O Multiplexing
 
-POSIX最早提供的同步IO多路复用调用是[select](http://linux.die.net/man/2/select)。它可以帮助应用程序同时监听多个socket上的可读、可写事件，当有socket可读可写时返回这些socket。同步IO模型中等待IO就绪的工作被交给了select函数，由内核态代码高效实现。
+POSIX最早提供的阻塞IO多路复用调用是[select](http://linux.die.net/man/2/select)。它可以帮助应用程序同时监听多个socket上的可读、可写事件，当有socket可读可写时返回这些socket。阻塞IO模型中等待IO就绪的工作被交给了select函数，由内核态代码高效实现。
 
 ```cpp
 std::set<int> connFds;
@@ -129,12 +129,12 @@ select多路复用能够处理比同步IO多得多的并发量，在一些要求
 
 * 低效地轮询。这点从select函数的参数中就能看出端倪。[select](http://linux.die.net/man/2/select)函数的第一个参数是需要监听的最大的socket id，每次select调用系统采用轮询的方式逐个检查这些socket中有无就绪。如果没有这个最大id，内核就要遍历整个socket id的取值范围。该参数缓解了问题，但没有彻底解决问题，一旦有某个socket id很大，这种优化就失效了。另外，每次select返回时就绪的socket很可能只占监视集合的很小一部分，遍历所作的无用功其实很多。
 
-2002年，linux 2.5.44版本内核包含了另一个多路复用API：[epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)，它的出现解决了select的问题。
+2002年，linux 2.5.44版本内核包含了另一个多路复用API：[epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)，它的出现解决了select的问题。epoll的出色性能使它很长一段时间内都是linux上实现高并发服务的首选方案。
 
 * epoll所支持的fd上限是最大可以打开文件句柄数。
 * 内核在epoll的实现上，取消了内部等待进程对socket就绪事件的轮询，采用设备就绪时回调的方式将就绪的socket加入就绪列表。
 
-epoll的出色性能使它成为linux上实现高并发服务的首选方案。
+
 
 ```cpp
 _epollfd = ::epoll_create(10);
@@ -284,7 +284,9 @@ int main(int argc, char* argv[])
 
 ## POSIX AIO and Kernel AIO
 
-* [Linux AIO](https://github.com/littledan/linux-aio)
+AIO试图把IO操作以统一的异步接口提供开发者，select/epoll等多路复用APIs在AIO中是不存在的，开发者将fd传入AIO API，内核在fd上有数据时直接通知调用方。Windows上的IOCP是一个真正意义上高效的AIO实现，而Linux对[AIO](https://github.com/littledan/linux-aio)的支持较晚，开发持续了很长时间也没有成熟，陷入了泥藻。
+
+目前Linux上常见的AIO应用场景是读写磁盘文件，在网络socket上的稳定应用十分罕见。这导致AIO甚至被理解为异步磁盘IO的特化方案。
 
 On linux, the two AIO implementations are [fundamentally different](https://stackoverflow.com/questions/8768083/difference-between-posix-aio-and-libaio-on-linux).
 
