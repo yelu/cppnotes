@@ -205,7 +205,7 @@ for (;;)
 
 libevent的设计风格和POSIX APIs一脉相承，比较薄的一层封装，接口不多不少，深得开发人员喜爱，Redis和MemeryCached的网络操作都是基于它的。
 
-尽管接口形式不同，这些库的设计思路是类似的，都是基于事件回调。下面是一个用Boost::Asio实现的[echo server](http://www.boost.org/doc/libs/1_47_0/doc/html/boost_asio/example/echo/async_tcp_echo_server.cpp)精简后的代码。io_service是一个经过封装的IO多路复用器。借助asio，client-server交互的流程是：
+尽管接口形式不同，这些库的设计思路是类似的，都是基于事件回调。下面是一个用Boost::Asio实现的[echo server](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_asio/example/cpp11/echo/async_tcp_echo_server.cpp)精简后的代码。io_service是一个经过封装的IO多路复用器。借助asio，client-server交互的流程是：
 
 1. server对象构造函数调用start_accept，向acceptor注册完成事件回调server::handle_accept。
 2. accept完成后，handle_accept将会被调用，执行session::start函数，同时再次调用start_accept用于监听新的连接。
