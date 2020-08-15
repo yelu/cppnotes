@@ -302,3 +302,8 @@ The kernel AIO (i.e. io_submit() et.al.) is kernel support for asynchronous I/O 
 
 Also keep in mind that io_submit() can actually block on the disk under certain circumstances.
 
+## 练习
+
+**1.** socket和端口的区别和联系。
+
+**2.** server在accept之后会返回一个新的socket，这个socket对应的server端口是什么？对这个socket的读写如何区分不同的client端？
