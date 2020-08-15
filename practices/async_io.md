@@ -2,11 +2,11 @@
 
 由于磁盘、网卡等输入输出设备和CPU的处理速度不匹配，异步IO是程序处理输入输出的常用模式。CPU发起IO请求之后并不等待执行完成，而是继续其它操作，设备在IO操作完成之后通知发起线程IO请求完成。
 
-常见的IO操作有两类：磁盘IO和网络IO。基于Linux一切都是文件的哲学，对应用层代码而言，从磁盘和网络读写数据，都是调用内核函数对文件句柄进行读写。不过磁盘存取和来自网络的请求毕竟是不同的，相应的编程模式还是会有所不同。
+常见的IO操作有两类：磁盘IO和网络IO。基于Linux一切都是文件的哲学，对应用层代码而言，从磁盘和网络读写数据，都是调用内核函数对文件句柄进行读写。不过存取磁盘数据和处理网络请求毕竟是不同的，相应的编程模式也会有所区别。
 
 ## 网络IO模型
 
-在计算机网络中，使用最为广泛的通信协议是TCP/IP协议簇。服务进程间通信采用的是客户端/服务器模型，运行在客户端和服务器端主机应用层的程序通过建立点对点的连接来实现通信，连接的端点称为[网络Socket](http://en.wikipedia.org/wiki/Network_socket)，它由网络层的IP地址和传输层的TCP(UDP)端口组成。一个连接由通信两端的Socket对唯一确定，这对socket称为套接字对，由一个二元组表示。服务器和客户端通过对各自Socket的读写实现数据的收发。
+在计算机网络中，使用最为广泛的通信协议是TCP/IP协议簇。进程间通信采用的是客户端/服务器模型，运行在客户端和服务器端主机应用层的程序通过建立点对点的连接来实现通信，连接的端点称为[网络Socket](http://en.wikipedia.org/wiki/Network_socket)，它由网络层的IP地址和传输层的TCP(UDP)端口组成。一个连接由通信两端的Socket对唯一确定，这对Socket称为套接字对，由一个二元组表示。服务器和客户端通过对各自Socket的读写实现数据的收发。
 
 ```
 (ClientAddr:ClientPort, ServerAddr:ServerPort)
@@ -64,7 +64,7 @@ write(conn_fd, &data_recv, sizeof(data_recv));
 close(conn_fd);
 ```
 
-采用同步IO的server在处理并发连接时存在困难。主线程在接受一个连接后，会阻塞在read处等待client发送数据，如果此时client迟迟不发送数据或者网络状况不佳，主线程就会在read处一直等待，无法处理新的连接请求。
+采用阻塞IO的server在处理并发连接时存在困难。主线程在接受一个连接后，会阻塞在read处等待client发送数据，如果此时client迟迟不发送数据或者网络状况不佳，主线程就会在read处一直等待，无法处理新的连接请求。
 
 解决该问题可以借助多线程/多进程。主线程在accept之后创建一个线程执行read和write操作，然后马上返回accept处，等待新的连接请求。这个解决方案可以处理并发连接，但是线程作为操作系统的资源，创建和销毁的是有开销的，不可能不停地创建。
 
@@ -72,7 +72,7 @@ close(conn_fd);
 
 ## I/O Multiplexing
 
-POSIX最早提供的同步IO多路复用调用是[select](http://linux.die.net/man/2/select)。它可以帮助应用程序**同时监听**多个socket上的可读、可写事件，当有socket可读可写时返回这些socket。同步IO模型中等待IO就绪的工作被交给了select函数，由内核态代码高效实现。
+POSIX最早提供的同步IO多路复用调用是[select](http://linux.die.net/man/2/select)。它可以帮助应用程序同时监听多个socket上的可读、可写事件，当有socket可读可写时返回这些socket。同步IO模型中等待IO就绪的工作被交给了select函数，由内核态代码高效实现。
 
 ```cpp
 std::set<int> connFds;
@@ -125,9 +125,9 @@ for ( ; ; )
 
 select多路复用能够处理比同步IO多得多的并发量，在一些要求没那么高的场景下已经足够应付了。但缺点也还是有：
 
-* 监听socket数目受限。fd_set是一个bit数组，这个数组的大小是在一个固定值，跟内核编译时代码中一个宏的设置有关，其默认值为1024。这导致select能够同时监听的socket数目是受限的。
+* 监听socket数目受限。fd_set是一个bit数组，这个数组的大小是固定的，跟内核编译时代码中一个宏有关，其默认值为1024。这导致select能够同时监听的socket数目是受限的。
 
-* 低效地轮询。这点从select函数的参数中就能看出端倪。[select](http://linux.die.net/man/2/select)函数的第一个参数是需要监听的最大的socket id。每次select调用系统采用轮询的方式一个个检查这些socket中有无socket可读，如果没有这个最大id，系统每次必须遍历整个socket id的取值范围，耗费大量cpu时间。该参数缓解了问题，但没有彻底解决问题，一旦有某个socket号很大，这种优化就失效了。加上每次select返回时可读/可写的socket很可能只占所有监视集合的很小一部分，遍历所作的无用功其实很多。
+* 低效地轮询。这点从select函数的参数中就能看出端倪。[select](http://linux.die.net/man/2/select)函数的第一个参数是需要监听的最大的socket id，每次select调用系统采用轮询的方式逐个检查这些socket中有无就绪。如果没有这个最大id，内核就要遍历整个socket id的取值范围。该参数缓解了问题，但没有彻底解决问题，一旦有某个socket id很大，这种优化就失效了。另外，每次select返回时就绪的socket很可能只占监视集合的很小一部分，遍历所作的无用功其实很多。
 
 2002年，linux 2.5.44版本内核包含了另一个多路复用API：[epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)，它的出现解决了select的问题。
 
