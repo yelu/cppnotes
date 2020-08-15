@@ -2,9 +2,11 @@
 
 由于磁盘、网卡等输入输出设备和CPU的处理速度不匹配，异步IO是程序处理输入输出的常用模式。CPU发起IO请求之后并不等待执行完成，而是继续其它操作，设备在IO操作完成之后通知发起线程IO请求完成。
 
+常见的IO操作分为两类，磁盘IO和网络IO。基于Linux一切都是文件的哲学，对应用层代码而言，从磁盘和网络读写数据，都是调用内核函数对文件句柄进行读写。不过磁盘存取和来自网络的请求毕竟是不同的，相应的编程模式还是会有所不同。
+
 ## 网络IO模型
 
-在计算机网络中，使用最为广泛的网络通信协议是TCP/IP协议簇，服务进程间通信采用的是客户端-服务器模型。运行在客户端和服务器端主机应用层的程序通过建立点对点的连接来实现通信，连接的端点称为[网络socket](http://en.wikipedia.org/wiki/Network_socket)，它由网络层的IP地址和传输层的TCP(UDP)端口组成。一个连接由通信两端的socket唯一确定，这对socket称为套接字对，由一个二元组表示：
+在计算机网络中，使用最为广泛的通信协议是TCP/IP协议簇。服务进程间通信采用的是客户端/服务器模型，运行在客户端和服务器端主机应用层的程序通过建立点对点的连接来实现通信，连接的端点称为[网络Socket](http://en.wikipedia.org/wiki/Network_socket)，它由网络层的IP地址和传输层的TCP(UDP)端口组成。一个连接由通信两端的Socket对唯一确定，这对socket称为套接字对，由一个二元组表示。服务器和客户端通过对各自Socket的读写实现数据的收发。
 
 ```
 (ClientAddr:ClientPort, ServerAddr:ServerPort)
@@ -12,7 +14,7 @@
     
 ![Hardware and Software Organization of Internet Application](./HardwareAndSoftwareOrganizationOfInternetApplication.png)
 
-操作网络socket的一组最有名的API是[Berkeley Socket APIs](http://en.wikipedia.org/wiki/Berkeley_sockets#Socket_API_functions)。它最早于1983年在BSD Unix 4.2上发布。然而，由于AT&T的专利保护着UNIX，到1989年Berkeley大学才能够自由地发布它们。其设计简单、实用，后来逐渐成为了网络socket操作的事实标准。包含的主要函数有：
+操作Socket的一组最有名的API是[Berkeley Socket APIs](http://en.wikipedia.org/wiki/Berkeley_sockets#Socket_API_functions)。它最早于1983年在BSD Unix 4.2上发布。然而，由于AT&T的专利保护着UNIX，到1989年Berkeley大学才能够自由地发布它们。其设计简单、实用，后来逐渐成为了网络socket操作的事实标准。包含的主要函数有：
 
 * socket()
 * bind()/listen()/accept(). Used on the server side.
@@ -21,72 +23,58 @@
 * close()
 * select(), poll()
 
-## Synchronous & Blocking IO
+## Synchronous IO
 
-基于BSD socket API，我们首先从一个最简单的echo server的实现开始，逐步来看每一个方案的问题在哪里，是哪些因素推进了我们选择新的解决方案，哪些技术为目前工业界主流的高并发方案所采用。
+基于BSD Socket API，client和server端的工作流程如下，`read`和`write`调用只有在数据到达或者出现错误时才会返回。在服务器端，操作流程为：
 
-![TCP Workflow](./TCPWorkflow.png)
-
-在服务器端，操作流程如下：
-
-1. 建立监听Socket listen_fd。
+1. 建立监听socket listen_fd。
 2. 通过bind将listen_fd绑定到端口上。
 3. 开始在listen_fd上进行监听。
 4. 一旦有client连接，listen操作就会返回。此时调用accept操作返回一个新的socket conn_fd。
 5. 通过对conn_fd的read和write操作实现和client的通信。
 
-```C++
-int main(int argc, char **argv)
-{
-    int listenFd, connFd;
-    pid_t childpid;
-    socklen_t clientAddrLen;
-    struct sockaddr_in clientAddr, svrAddr;
-    int srvListenPort = 9877;
-    
-    listenFd = socket(AF_INET, SOCK_STREAM, 0);
-    if(listenFd < 0) { return 1; }
-    bzero(&svrAddr, sizeof(svrAddr));
-    svrAddr.sin_family = AF_INET;
-    svrAddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    svrAddr.sin_port = htons (srvListenPort);
-    if(bind(listenFd, (sockaddr*)&svrAddr, sizeof(svrAddr)) < 0){ return 1;}
-    if(listen(listenFd, LISTENQ) < 0) {return 1;}
-    char buff[1024];
-    for ( ; ; ) 
-    {
-        clientAddrLen = sizeof(clientAddr);
-        connFd = accept(listenFd, (SA *) &clientAddr, &clientAddrLen);
-        if(connFd < 0) {continue;}
-        // read and send data.
-        int dataRecv = 0;
-        if(read(connFd, &dataRecv, sizeof(dataRecv)) != sizeof(dataRecv)) {continue;}
-        write(connFd, &dataRecv, sizeof(dataRecv));
-        close(connFd);
-    }
-    close(listenFd);
-    return 0;
-}
+![TCP Workflow](./TCPWorkflow.png)
+
+```cpp
+// create socket
+int listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+if(listen_fd < 0) { return 1; }
+struct sockaddr_in svr_addr;
+svr_addr.sin_family = AF_INET;
+svr_addr.sin_addr.s_addr = htonl(INADDR_ANY);
+svr_addr.sin_port = htons (8888);
+
+// bind
+if(bind(listen_fd, (sockaddr*)&svr_addr, sizeof(svr_addr)) < 0){ return 1; }
+
+// listen
+if(listen(listen_fd, 3 /*backlog*/) < 0) { return 1; }
+
+struct sockaddr_in client_addr;
+socklen_t client_addr_len = sizeof(client_addr);
+
+// accept
+int conn_fd = accept(listen_fd, (struct sockaddr*)&client_addr, &client_addr_len);
+if(conn_fd < 0) { continue; }
+
+// read and send data
+int data_recv = 0;
+if(read(conn_fd, &data_recv, sizeof(data_recv)) != sizeof(data_recv)) { continue; }
+write(conn_fd, &data_recv, sizeof(data_recv));
+close(conn_fd);
 ```
 
-这种IO操作方式称为同步阻塞IO(synchronous & blocking IO):
+采用同步IO的server在处理并发连接时存在困难。主线程在接受一个连接后，会阻塞在read处等待client发送数据，如果此时client迟迟不发送数据或者网络状况不佳，主线程就会在read处一直等待，无法处理新的连接请求。
 
-* 处理流程是同步的。bind、listen、accept、read和write返回即代表它们需要负责的工作已经执行完毕，这和之后提到的异步回调方式形成对应。
-* IO操作是阻塞的。read和write操作会等待数据到达，直到有数据到达或者出现错误才会返回。
+解决该问题可以借助多线程/多进程。主线程在accept之后新建一个线程执行read和write操作，然后马上返回accept处，等待新的连接请求。
 
-同步阻塞IO模型在处理并发连接时存在困难。在主线程接受一个连接后，会阻塞在read处等待client发送数据，如果此时client迟迟不发送数据或者网络状况不佳，主线程就会在read处一直等待，无法处理新的连接请求。
+这个解决方案可以处理并发连接，但是线程作为操作系统的资源，创建和销毁的是有开销的，不可能不停地创建。使用线程池复用线程能不能解决问题呢？我们创建一个包含若干个线程的线程池，主线程作为生产者，负责不断地接收连接请求，并将其放入队列中。线程池作为消费者，从队列中取出连接进行处理。这依然不是个合格的方案，假设线程池有20个线程，某client端同时发起20个socket连接，之后拒绝发送数据，所有线程都会在read处阻塞，这就形成了一个简单的DDoS攻击。
 
-解决该问题可以借助多线程/多进程。对于上面的echo server，主线程在accept之后新建一个线程，然后马上返回accept处，处理新的连接请求，read和write操作在新的线程中执行。
+其实，等待read和write的时间并没有因为使用线程池而减少，只是平摊给了处理线程。如果想要提高并发处理能力，要解决的根本问题是**避免CPU花时间等待IO就绪**。做到这点，需要IO多路复用(I/O multiplexing)。
 
-这个解决方案可以处理并发连接，但是线程作为操作系统的资源，不可能无限制创建，加上线程切换的开销，该方式无法支撑超高并发的连接请求。
+## I/O Multiplexing
 
-使用线程池复用线程能不能解决线程无限制增长的问题呢？我们创建一个包含若干个线程的线程池，主线程作为生产者，负责不断地新建socket连接，并将socket放入一个队列中。另外一个独立线程作为消费者，不断地查看队列中有没有新链接，以及线程池中有没有空闲线程，如果都有，就从线程池中取出空闲线程处理新连接。这样，是不是同时解决了主线程阻塞和线程数目不受控的问题呢？确实解决了，但没有解决本质问题。假设线程池有20个线程，某client端同时发起20个socket连接，之后拒绝发送数据，所有线程都会在read处阻塞，这就形成了一个简单的DDoS攻击。
-
-如果换一个角度来看的话，其实，等待read和write的时间并没有因为使用多线程而减少，只是平摊到了任务处理线程之中。因此，如果想要提高并发处理能力，要解决的根本问题是**减少代码等待IO就绪的时间**。要做到这点，我们需要另一种IO模型-同步IO多路复用（synchronous I/O multiplexing）。
-
-## Synchronous I/O multiplexing
-
-POSIX最早提供的同步IO多路复用的接口函数是[select](http://linux.die.net/man/2/select)。它可以帮助应用程序**同时监听**多个socket上的可读、可写事件，当有socket可读可写时返回这些socket。阻塞IO模型中等待IO就绪的时间被交给了select函数，由内核态代码高效实现。一个典型的select事件循环如下，清晰起见，我们略过一些错误处理逻辑。
+POSIX最早提供的同步IO多路复用调用是[select](http://linux.die.net/man/2/select)。它可以帮助应用程序**同时监听**多个socket上的可读、可写事件，当有socket可读可写时返回这些socket。同步IO模型中等待IO就绪的工作被交给了select函数，由内核态代码高效实现。
 
 ```cpp
 std::set<int> connFds;
@@ -137,18 +125,18 @@ for ( ; ; )
 }
 ```
 
-select多路复用比同步阻塞IO能够处理多得多的并发量，在一些要求没那么高的场景下已经足够应付了。但缺点也还是有：
+select多路复用能够处理比同步IO多得多的并发量，在一些要求没那么高的场景下已经足够应付了。但缺点也还是有：
 
 * 监听socket数目受限。fd_set是一个bit数组，这个数组的大小是在一个固定值，跟内核编译时代码中一个宏的设置有关，其默认值为1024。这导致select能够同时监听的socket数目是受限的。
 
 * 低效地轮询。这点从select函数的参数中就能看出端倪。[select](http://linux.die.net/man/2/select)函数的第一个参数是需要监听的最大的socket id。每次select调用系统采用轮询的方式一个个检查这些socket中有无socket可读，如果没有这个最大id，系统每次必须遍历整个socket id的取值范围，耗费大量cpu时间。该参数缓解了问题，但没有彻底解决问题，一旦有某个socket号很大，这种优化就失效了。加上每次select返回时可读/可写的socket很可能只占所有监视集合的很小一部分，遍历所作的无用功其实很多。
 
-2002年，linux 2.5.44版本内核包含了另一个多路复用API - [epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)，它的出现解决了select的所有问题。
+2002年，linux 2.5.44版本内核包含了另一个多路复用API：[epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)，它的出现解决了select的问题。
 
 * epoll所支持的fd上限是最大可以打开文件句柄数。
 * 内核在epoll的实现上，取消了内部等待进程对socket就绪事件的轮询，采用设备就绪时回调的方式将就绪的socket加入就绪列表。
 
-epoll的出色性能使它成为linux上实现高并发服务的首选方案。一个精简的epoll事件循环如下：
+epoll的出色性能使它成为linux上实现高并发服务的首选方案。
 
 ```cpp
 _epollfd = ::epoll_create(10);
@@ -195,41 +183,29 @@ for (;;)
 }
 ```
 
-不同的平台对这种IO多路复用思路都提供了实现：
-
-| Pltform       | API           |
-| ------------- |-------------  |
-| Linux         | epoll/select   |
-| Free BSD      | kqueue         |
-| Windows       | IOCP(完成端口)  |
-
-无论是平台和实现，IO多路复用机制的工作模式类似：
+不同平台对这种IO多路复用思路都提供了实现，它们的工作模式是类似的：
 
 1. 在一个事件循环中，用户在注册感兴趣的fd和事件。对应30-32行刚收到连接时，设置监听错误事件。
 2. 多路复用API（select/epoll等）利用内核机制负责监听事件。对应第9行的epoll_wait。
 3. 事件发生后返回，并通知用户发生事件的fd及发生了何种事件。对应10-38行，检查epoll返回的就绪fd和事件，进行对应的业务处理。
 4. 回到1，重新开始事件循环。对应上面代码的无限for循环。
 
-## 融合业务代码
-
-到目前为止，我们并没有考虑业务代码，例如，连接后需要执行CPU密集型的计算。如果业务处理代码都是内存操作，很快就能结束，在事件循环所在的线程中运行就可以了。Redis就采用了这种方式。
-
-如果业务处理代码涉及CPU密集型的操作，将业务代码直接放在事件循环线程中运行，就会阻碍事件循环，影响接收新连接。这时，就是需要增加线程池用于处理CPU密集型业务逻辑的时候了。这是MemoryCached使用的方式。
-
-1. 事件循环线程将就绪的fd放入就绪fd队列readyFdQueue。一个fd对应一个业务连接conn，为了记住conn的业务处理进度，需要为每个conn建立一个状态机connState，记录conn的状态。
-2. 监视线程不断检查readyFdQueue和线程池threadPool，如果有就绪fd和空闲线程，就拿出一个线程thread处理该fd。
-3. thread根据fd获取该连接的connState结构，根据进度决定接下来需要做什么操作。如果碰到需要IO请求，将fd投入epoll的请求队列requestQueue，将当前状态回写connState。之后，线程退出处理逻辑，等待epoll下一次IO就绪时唤醒该连接继续处理。
+| Pltform       | API           |
+| ------------- |-------------  |
+| Linux         | epoll/select  |
+| Free BSD      | kqueue        |
+| Windows       | IOCP          |
 
 ## 使用库：libevent和Asio
 
-直接使用底层的API操作，尽管效率很高，但开发难度较大，也不好跨平台。幸运的是，有大量的库对网络IO操作进行了跨平台的封装，其中最著名的有：
+直接使用底层的API操作，尽管效率很高，但开发难度较大，也不好跨平台。幸运的是，有大量的库对网络IO操作进行了跨平台的封装，著名的有：
 
 * libevent。轻量级，C风格。
 * boost::asio。较libevent重量，C++面向对象风格。
 
-libevent的设计风格和POSIX APIs一脉相承，比较薄的一层封装，接口不多不少，深得很多开发人员的喜爱，Redis和MemeryCached的网络操作都是基于它的。
+libevent的设计风格和POSIX APIs一脉相承，比较薄的一层封装，接口不多不少，深得开发人员喜爱，Redis和MemeryCached的网络操作都是基于它的。
 
-除去一些接口形式上的不同，这些库的设计思路其实类似：都是基于事件回调。下面是一个用Boost::Asio实现的[echo server](http://www.boost.org/doc/libs/1_47_0/doc/html/boost_asio/example/echo/async_tcp_echo_server.cpp)精简后的代码。io_service是一个经过封装的IO多路复用器。借助asio，client-server交互的流程是：
+尽管接口形式不同，这些库的设计思路是类似的，都是基于事件回调。下面是一个用Boost::Asio实现的[echo server](http://www.boost.org/doc/libs/1_47_0/doc/html/boost_asio/example/echo/async_tcp_echo_server.cpp)精简后的代码。io_service是一个经过封装的IO多路复用器。借助asio，client-server交互的流程是：
 
 1. server对象构造函数调用start_accept，向acceptor注册完成事件回调server::handle_accept。
 2. accept完成后，handle_accept将会被调用，执行session::start函数，同时再次调用start_accept用于监听新的连接。
@@ -292,7 +268,7 @@ int main(int argc, char* argv[])
 
 ## 使用协程
 
-到目前为止，我们提高并发能力的思路是这样的：
+目前为止，我们提高并发能力的思路是这样的：
 
 * 同步阻塞。无法并发。
 * 多线程。实现简单，效率低。
@@ -326,4 +302,3 @@ The kernel AIO (i.e. io_submit() et.al.) is kernel support for asynchronous I/O 
 
 Also keep in mind that io_submit() can actually block on the disk under certain circumstances.
 
-关于协程，还有很多值得思考的，我们把它放在附录二中。

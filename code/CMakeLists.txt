@@ -7,5 +7,7 @@ project(cppnotes)
 add_executable(obj_model move_constructor.cpp)
 target_include_directories(obj_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
-add_executable(code linux_aio.cpp)
-target_link_libraries(code PUBLIC aio pthread)
+add_executable(file_aio file_aio.cpp)
+target_link_libraries(file_aio PUBLIC aio pthread)
+
+add_executable(net_sync_io echo_server_sync.cpp)
