@@ -1,0 +1,34 @@
+#include "unp.h"
+
+
+int main(int argc, char **argv)
+{
+    int listenFd, connFd;
+    pid_t childpid;
+    socklen_t clientAddrLen;
+    struct sockaddr_in clientAddr, svrAddr;
+    int srvListenPort = 9877;
+    
+    listenFd = socket(AF_INET, SOCK_STREAM, 0);
+    if(listenFd < 0) { return 1; }
+    bzero(&svrAddr, sizeof(svrAddr));
+    svrAddr.sin_family = AF_INET;
+    svrAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    svrAddr.sin_port = htons (srvListenPort);
+    if(bind(listenFd, (sockaddr*)&svrAddr, sizeof(svrAddr)) < 0){ return 1;}
+    if(listen(listenFd, LISTENQ) < 0) {return 1;}
+    char buff[1024];
+    for ( ; ; ) 
+    {
+        clientAddrLen = sizeof(clientAddr);
+        connFd = accept(listenFd, (SA *) &clientAddr, &clientAddrLen);
+        if(connFd < 0) {continue;}
+        // read and send data.
+        int dataRecv = 0;
+        if(read(connFd, &dataRecv, sizeof(dataRecv)) != sizeof(dataRecv)) {continue;}
+        write(connFd, &dataRecv, sizeof(dataRecv));
+        close(connFd);
+    }
+    close(listenFd);
+    return 0;
+}

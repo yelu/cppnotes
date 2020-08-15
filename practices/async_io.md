@@ -1,12 +1,10 @@
 # 异步IO
 
-我们今天使用的用户量巨大的互联网服务，在为用户结果返回的过程中，都有很多后台子系统参与其中，它们以实时在线服务的形式存在，通过预定的协议相互通信和协作，最终生成结果。巨大的访问量要求它们能够有效利用CPU资源处理网络IO，提高并发处理能力。本节我们来了解下异步IO是如何走入这些工业级的高并发系统后台服务的。
-
-追求高并发是贯穿本文的线索。本节只关注网络IO本身的时间效率如何提高(IO-bound)，服务承载的业务所消耗的资源不在考虑之列(CPU-bound)。
+由于磁盘、网卡等输入输出设备和CPU的处理速度不匹配，异步IO是程序处理输入输出的常用模式。CPU发起IO请求之后并不等待执行完成，而是继续其它操作，设备在IO操作完成之后通知发起线程IO请求完成。
 
 ## 网络IO模型
 
-在计算机网络中，使用最为广泛的网络通信协议是TCP/IP协议簇，服务进程间通信最常采用的是客户端-服务器模型。运行在客户端和服务器端主机应用层的程序通过建立点对点的连接来实现通信，连接的端点称为[网络socket](http://en.wikipedia.org/wiki/Network_socket)，它由网络层的IP地址和传输层的TCP(UDP)端口组成。一个连接由通信两端的socket唯一确定，这对socket称为套接字对，由一个二元组表示：
+在计算机网络中，使用最为广泛的网络通信协议是TCP/IP协议簇，服务进程间通信采用的是客户端-服务器模型。运行在客户端和服务器端主机应用层的程序通过建立点对点的连接来实现通信，连接的端点称为[网络socket](http://en.wikipedia.org/wiki/Network_socket)，它由网络层的IP地址和传输层的TCP(UDP)端口组成。一个连接由通信两端的socket唯一确定，这对socket称为套接字对，由一个二元组表示：
 
 ```
 (ClientAddr:ClientPort, ServerAddr:ServerPort)
@@ -14,17 +12,14 @@
     
 ![Hardware and Software Organization of Internet Application](./HardwareAndSoftwareOrganizationOfInternetApplication.png)
 
-操作网络socket的一组最有名的API是[Berkeley scoket API](http://en.wikipedia.org/wiki/Berkeley_sockets#Socket_API_functions)。它最开始在BSD Unix 4.2上于1983年发布。然而，由于AT&T的专利保护着UNIX，到1989年Berkeley大学才能够自由地发布它们。其设计简单、实用，后来逐渐成为了网络socket操作的事实标准。包含的主要函数有：
+操作网络socket的一组最有名的API是[Berkeley Socket APIs](http://en.wikipedia.org/wiki/Berkeley_sockets#Socket_API_functions)。它最早于1983年在BSD Unix 4.2上发布。然而，由于AT&T的专利保护着UNIX，到1989年Berkeley大学才能够自由地发布它们。其设计简单、实用，后来逐渐成为了网络socket操作的事实标准。包含的主要函数有：
 
-* socket() creates a new socket of a certain socket type, identified by an integer number, and allocates system resources to it.
-* bind() is typically used on the server side, and associates a socket with a socket address structure, i.e. a specified local port number and IP address.
-* listen() is used on the server side, and causes a bound TCP socket to enter listening state.
-* connect() is used on the client side, and assigns a free local port number to a socket. In case of a TCP socket, it causes an attempt to establish a new TCP connection.
-* accept() is used on the server side. It accepts a received incoming attempt to create a new TCP connection from the remote client, and creates a new socket associated with the socket address pair of this connection.
-* send() and recv(), or write() and read(), or sendto() and recvfrom(), are used for sending and receiving data to/from a remote socket.
-* close() causes the system to release resources allocated to a socket. In case of TCP, the connection is terminated.
-* select() is used to pend, waiting for one or more of a provided list of sockets to be ready to read, ready to write, or that have errors.
-* poll() is used to check on the state of a socket in a set of sockets. The set can be tested to see if any socket can be written to, read from or if an error occurred.
+* socket()
+* bind()/listen()/accept(). Used on the server side.
+* connect(). Used on the client side.
+* send()/recv(), or write()/read(), or sendto()/recvfrom()
+* close()
+* select(), poll()
 
 ## Synchronous & Blocking IO
 
@@ -34,11 +29,11 @@
 
 在服务器端，操作流程如下：
 
-1. 建立监听socket listenFd。
-2. 通过bind将listenFd绑定到端口上。
-3. 开始在listenFd上进行监听。
-4. 一旦有client连接，listen操作就会返回。此时调用accept操作返回一个新的socket connFd。
-5. 通过对connFd的read和write操作实现和client的通信。
+1. 建立监听Socket listen_fd。
+2. 通过bind将listen_fd绑定到端口上。
+3. 开始在listen_fd上进行监听。
+4. 一旦有client连接，listen操作就会返回。此时调用accept操作返回一个新的socket conn_fd。
+5. 通过对conn_fd的read和write操作实现和client的通信。
 
 ```C++
 int main(int argc, char **argv)
@@ -74,14 +69,16 @@ int main(int argc, char **argv)
 }
 ```
 
-这种IO操作方式称为同步阻塞IO（synchronous & blocking IO）:
+这种IO操作方式称为同步阻塞IO(synchronous & blocking IO):
 
-* 处理流程是同步的。bind、listen、accept、read和write返回即代表它们需要负责的工作已经执行完毕，这和下文会提到的异步回调方式形成对应。
+* 处理流程是同步的。bind、listen、accept、read和write返回即代表它们需要负责的工作已经执行完毕，这和之后提到的异步回调方式形成对应。
 * IO操作是阻塞的。read和write操作会等待数据到达，直到有数据到达或者出现错误才会返回。
 
 同步阻塞IO模型在处理并发连接时存在困难。在主线程接受一个连接后，会阻塞在read处等待client发送数据，如果此时client迟迟不发送数据或者网络状况不佳，主线程就会在read处一直等待，无法处理新的连接请求。
 
-解决该问题可以借助多线程/多进程。在accept之后新建一个线程，或者fork出一个进程来处理每个连接。具体来说，对于上面的echo server，可以将read和write操作放入一个新的线程中执行，主线程在accept之后新建线程，然后马上返回accept处，处理新的连接请求。这个解决方案的问题是，它可以处理并发连接，但**无法处理超高并发连接**。线程作为操作系统的资源，新建10-20个尚且可以，而新建成千上万个所需要的系统资源是巨大的。实际情况下，不会有人创建过成千上万个同时运行的线程。
+解决该问题可以借助多线程/多进程。对于上面的echo server，主线程在accept之后新建一个线程，然后马上返回accept处，处理新的连接请求，read和write操作在新的线程中执行。
+
+这个解决方案可以处理并发连接，但是线程作为操作系统的资源，不可能无限制创建，加上线程切换的开销，该方式无法支撑超高并发的连接请求。
 
 使用线程池复用线程能不能解决线程无限制增长的问题呢？我们创建一个包含若干个线程的线程池，主线程作为生产者，负责不断地新建socket连接，并将socket放入一个队列中。另外一个独立线程作为消费者，不断地查看队列中有没有新链接，以及线程池中有没有空闲线程，如果都有，就从线程池中取出空闲线程处理新连接。这样，是不是同时解决了主线程阻塞和线程数目不受控的问题呢？确实解决了，但没有解决本质问题。假设线程池有20个线程，某client端同时发起20个socket连接，之后拒绝发送数据，所有线程都会在read处阻塞，这就形成了一个简单的DDoS攻击。
 
