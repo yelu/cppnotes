@@ -271,19 +271,15 @@ boost::asio已经完全支持协程，它提供co_spawn函数来启动一个协�
 
 Windows上的IOCP是一个真正意义上高效的AIO实现，而Linux内核[AIO](https://github.com/littledan/linux-aio)模块的开发持续了很长时间也没有成熟，似乎陷入了泥藻。目前Linux上常见的AIO应用场景是读写磁盘文件，在网络socket上的稳定应用十分罕见。这导致Linux AIO甚至被理解为异步IO针对磁盘文件的特化方案。
 
-On linux, the two AIO implementations are [fundamentally different](https://stackoverflow.com/questions/8768083/difference-between-posix-aio-and-libaio-on-linux).
+Linux上有[两种AIO实现](ttps://stackoverflow.com/questions/8768083/difference-between-posix-aio-and-libaio-on-linux)，二者有本质的不同。
 
-The POSIX AIO is a user-level implementation that performs normal blocking I/O in multiple threads, hence giving the illusion that the I/Os are asynchronous. The main reason to do this is that:
+POSIX AIO是在用户空间用任务队列和线程池模拟出来的，内部还是调用的Blocking IO APIs，它给用户提供了一种异步的假象。这一实现的缺点很明显，并发的操作数受限于内部线程池的大小，耗时的操作可能会导致后续的IO操作无法及时开始。但是这一实现是有它的考虑的：
 
-* it works with any filesystem
-* it works (essentially) on any operating system (keep in mind that gnu's libc is portable)
-* it works on files with buffering enabled (i.e. no O_DIRECT flag set)
+* 支持所有文件系统。
+* 考虑到glibc的可移植性，这种方案支持所有操作系统。
+* 支持启用了buffering的文件句柄(i.e. no O_DIRECT flag set)。
 
-The main drawback is that your queue depth (i.e. the number of outstanding operations you can have in practice) is limited by the number of threads you choose to have, which also means that a slow operation on one disk may block an operation going to a different disk. It also affects which I/Os (or how many) is seen by the kernel and the disk scheduler as well.
-
-The kernel AIO (i.e. io_submit() et.al.) is kernel support for asynchronous I/O operations, where the io requests are actually queued up in the kernel, sorted by whatever disk scheduler you have, presumably some of them are forwarded (in somewhat optimal order one would hope) to the actual disk as asynchronous operations (using TCQ or NCQ). The main restriction with this approach is that not all filesystems work that well or at all with async I/O (and may fall back to blocking semantics), files have to be opened with O_DIRECT which comes with a whole lot of other restrictions on the I/O requests. If you fail to open your files with O_DIRECT, it may still "work", as in you get the right data back, but it probably isn't done asynchronously, but is falling back to blocking semantics.
-
-Also keep in mind that io_submit() can actually block on the disk under certain circumstances.
+Kernel AIO(i.e. io_submit())是实现在内核中对异步IO的支持。IO请求在内核队列中排队，内核会根据文件系统的情况对它们进行排序，尽可能保证它们快速地执行。现实中，不是所有的文件系统都能很好地工作。例如，想要异步读取，文件必须以O_DIRECT模式打开，顺带引来一堆其它施加在IO操作上的限制。而如果不这样做，很可能就会退化成阻塞IO。
 
 ## 练习
 
