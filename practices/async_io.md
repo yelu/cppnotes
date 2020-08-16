@@ -273,7 +273,7 @@ Windows上的IOCP是一个真正意义上高效的AIO实现，而Linux内核[AIO
 
 Linux上有[两种AIO实现](ttps://stackoverflow.com/questions/8768083/difference-between-posix-aio-and-libaio-on-linux)，二者有本质的不同。
 
-POSIX AIO是在用户空间用任务队列和线程池模拟出来的，内部还是调用的Blocking IO APIs，它给用户提供了一种异步的假象。这一实现的缺点很明显，并发的操作数受限于内部线程池的大小，耗时的操作可能会导致后续的IO操作无法及时开始。但是这一实现是有它的考虑的：
+POSIX AIO是在用户空间用任务队列和线程池模拟出来的，内部还是调用的Blocking IO APIs，它给用户提供了一种异步的假象。这一实现的缺点很明显，并发的操作数受限于内部线程池的大小，耗时的IO操作可能会导致后续的IO操作无法及时开始。但是这一实现是有它的考虑的：
 
 * 支持所有文件系统。
 * 考虑到glibc的可移植性，这种方案支持所有操作系统。
