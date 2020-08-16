@@ -10,4 +10,4 @@ target_include_directories(obj_model PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 add_executable(file_aio file_aio.cpp)
 target_link_libraries(file_aio PUBLIC aio pthread)
 
-add_executable(net_sync_io echo_server_sync.cpp)
+add_executable(net_io_blocking echo_server_blocking.cpp)
