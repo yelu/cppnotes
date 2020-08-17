@@ -30,8 +30,8 @@
 1. 建立监听socket listen_fd。
 2. 通过bind将listen_fd绑定到端口上。
 3. 开始在listen_fd上进行监听。
-4. 一旦有client连接，listen操作就会返回。此时调用accept操作返回一个新的socket conn_fd。
-5. 通过对conn_fd的read和write调用从client收发数据。
+4. 一旦有client连接，listen操作就会返回。此时调用accept会返回一个新的socket conn_fd。
+5. 通过对conn_fd的read/write实现从client收发数据。
 
 ![TCP Workflow](./TCPWorkflow.png)
 
@@ -74,7 +74,7 @@ POSIX最早提供的阻塞IO多路复用调用是[select](http://linux.die.net/m
 
 * 监听socket数目受限。fd_set是一个bit数组，这个数组的大小是定义在内核代码中的一个宏，默认值为1024。这导致select能够同时监听的socket数目是受限的。
 
-* 低效地轮询。这点从select函数的参数中就能看出端倪。[select](http://linux.die.net/man/2/select)函数的第一个参数是需要监听的最大的socket id，每次select调用系统采用轮询的方式逐个检查这些socket中有无就绪。如果没有这个最大id，内核就要遍历整个socket id的取值范围。该参数缓解了问题，但没有彻底解决问题，一旦有某个socket id很大，这种优化就失效了。另外，每次select返回时就绪的socket很可能只占监视集合的很小一部分，遍历所作的无用功其实很多。
+* 低效地轮询。这点从select函数的参数中就能看出端倪。[select](http://linux.die.net/man/2/select)的第一个参数是需要监听的最大的socket id，每次select调用系统采用轮询的方式逐个检查这些socket中有无就绪。如果没有这个最大id，内核就要遍历整个socket id的取值范围。该参数缓解了问题，但没有彻底解决问题，一旦有某个socket id很大，这种优化就失效了。另外，每次select返回时就绪的socket很可能只占监视集合的很小一部分，遍历所作的无用功其实很多。
 
 2002年，Linux 2.5.44版本内核包含了另一个IO多路复用API [epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)，它的出现解决了select的问题。epoll的出色性能使它很长一段时间内都是Linux上实现高并发服务的首选方案。
 
@@ -85,9 +85,9 @@ POSIX最早提供的阻塞IO多路复用调用是[select](http://linux.die.net/m
 
 ## 异步IO
 
-阻塞、非阻塞是很容易和同步、异步混淆起来的概念。阻塞意味着数据就绪再返回，非阻塞是无论数据是否就绪都返回并通知数据状态。同步意味着等待操作完成再返回，异步则不等待操作完成就返回，操作完成后通过回调函数等机制通知调用方。
+阻塞、非阻塞是很容易和同步、异步混淆起来的概念。阻塞意味着数据就绪再返回，非阻塞是无论数据是否就绪都返回并通知数据状态。同步意味着等待任务完成再返回，异步则不等待任务完成就返回，任务完成后通过回调函数等机制通知调用方。
 
-这么看，其实是难怪它们会被混为一谈。阻塞的就是同步的，异步的就是非阻塞的。概念都是人为的，我们不能要求所有人按照某种定义来理解某个词，也不能用某种诡辩的解释去充当权威。但是就本节而言，还是要用某种可被理解的方式约定它们的含义，在一个限定的上下文中才有机会更精确地描述和讨论问题。
+这么看，其实是难怪它们会被混为一谈。阻塞的就是同步的，异步的就是非阻塞的。概念都是人为的，出现不同的理解合情合理。但是就本节而言，还是要约定它们的含义，在一个限定的上下文中才有机会更精确地描述和讨论问题。
 
 * 阻塞和非阻塞用于描述IO系统调用的不同行为。关注点是发起线程会不会因为IO数据未就绪被挂起。
 * 同步和异步用于描述更广泛的编程模式，不限于IO。关注点是**完成**某一任务(Task，例如读取128字节)的方式，是调用返回就代表完成，还是立马返回完成后通过回调等方式通知。
@@ -97,7 +97,7 @@ POSIX最早提供的阻塞IO多路复用调用是[select](http://linux.die.net/m
 * libevent。轻量级，C风格。libevent的设计风格和POSIX APIs一脉相承，比较薄的一层封装，接口不多不少，深得开发人员喜爱，Redis和MemeryCached的网络操作都是基于它的。
 * boost::asio。较libevent重量，C++面向对象风格。
 
-一个基于boost::asio异步回调APIs实现的[echo server](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_asio/example/cpp11/echo/async_tcp_echo_server.cpp)参见*code/socket_server_asio.cpp*。io_context是一个经过封装的IO多路复用器。client/server的交互流程是：
+一个基于boost::asio异步回调APIs实现的[echo server](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_asio/example/cpp11/echo/async_tcp_echo_server.cpp)参见*code/socket_server_asio.cpp*。server的处理流程是：
 
 1. server通过acceptor发起新连接处理任务，并注册回调函数`on_accept_done`。
 2. 新连接建立时，`on_accept_done`被执行，它发起一次数据读取任务，并注册读取完成的回调函数`on_read_done`，接着再次发起新连接处理任务。
