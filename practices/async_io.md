@@ -100,13 +100,13 @@ POSIX最早提供的阻塞IO多路复用调用是[select](http://linux.die.net/m
 一个基于boost::asio异步回调APIs实现的[echo server](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_asio/example/cpp11/echo/async_tcp_echo_server.cpp)参见*code/socket_server_asio.cpp*。server的处理流程是：
 
 1. server通过acceptor发起新连接监听任务，并注册回调函数`on_accept_done`。
-2. 有新连接建立时，`on_accept_done`被执行，它发起一次数据读取任务，并注册读取完成的回调函数`on_read_done`，接着再次发起新连接处理任务。
+2. 有新连接建立时，`on_accept_done`被执行，它发起一次数据读取任务，并注册读取完成的回调函数`on_read_done`，接着再次发起新连接监听任务。
 3. 数据读取完成后，`on_read_done`被执行，它发起一次数据发送任务，并注册发送完成的回调函数`on_write_done`。
 4. 一次连接处理完成。
 
 ## 使用协程
 
-基于回调的异步编程模式实际上是很复杂的，它导致本来流畅完整的连接处理流程严重碎片化，正确地串接这些片段是个很有难度的任务。协程(Coroutine)是解决这一问题的方法之一。
+基于回调的异步IO编程实际上是很复杂的，它导致本来流畅完整的连接处理流程严重碎片化，正确地串接这些片段是个很有难度的任务。协程(Coroutine)是解决这一问题的方法之一。
 
 boost::asio已经完全支持协程，它提供co_spawn函数来启动一个协程，每个异步函数都有协程重载版本，使用起来就像在写同步程序一样。基于协程在C++ 20的落地，asio会在接下来的时间里继续改进对协程的支持，以更加合理、优雅、高效的方式准备加入到C++ 23。
 
