@@ -99,8 +99,8 @@ POSIX最早提供的阻塞IO多路复用调用是[select](http://linux.die.net/m
 
 一个基于boost::asio异步回调APIs实现的[echo server](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_asio/example/cpp11/echo/async_tcp_echo_server.cpp)参见*code/socket_server_asio.cpp*。server的处理流程是：
 
-1. server通过acceptor发起新连接处理任务，并注册回调函数`on_accept_done`。
-2. 新连接建立时，`on_accept_done`被执行，它发起一次数据读取任务，并注册读取完成的回调函数`on_read_done`，接着再次发起新连接处理任务。
+1. server通过acceptor发起新连接监听任务，并注册回调函数`on_accept_done`。
+2. 有新连接建立时，`on_accept_done`被执行，它发起一次数据读取任务，并注册读取完成的回调函数`on_read_done`，接着再次发起新连接处理任务。
 3. 数据读取完成后，`on_read_done`被执行，它发起一次数据发送任务，并注册发送完成的回调函数`on_write_done`。
 4. 一次连接处理完成。
 
