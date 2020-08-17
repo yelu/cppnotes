@@ -268,6 +268,10 @@ public:
 
 ## enable_shared_from_this
 
+如果`T* obj`已经被某个`shared_ptr<T> ptr1(obj)`管理，而当前代码只有obj指针，无法获得ptr，就无法安全地构造新的`share_ptr<T> ptr2`来管理obj。ptr1和ptr2之间互相不知道对方的存在，其中一个在生命周期结束时，便会释放obj。
+
+继承`enable_shared_from_this<T>`会在类型T中增加一个成员函数`shared_from_this`，该函数可以安全地从可能已经被智能指针管理的裸指针构造新的智能指针。
+
 ## CRT Runtime Linkage
 
 ## [Additional FAQ](https://isocpp.org/faq)

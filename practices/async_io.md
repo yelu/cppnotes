@@ -56,125 +56,32 @@ while(n < bytes_to_read) {
 
 如果用户线程调用Non-blocking IO，就只能通过不断地轮询来得知IO是否就绪，这是一种低效的方法。由于数据到达的时刻不可预知，轮询太快绝大多数查询都是没有意义的，轮询太慢处理耗时又过长，很难平衡效率和响应速度。
 
-而使用Blocking IO时，主线程在接受一个连接后，会阻塞在调用处等待数据就绪，期间无法处理其它连接请求。一个阻塞IO实现的echo server参见`code/echo_server_blocking.cpp`。解决该问题可以借助多线程/多进程。主线程在accept之后创建一个线程执行read和write操作，然后马上返回accept处，等待新的连接请求。这个解决方案可以处理并发连接，但是线程作为操作系统的资源，创建、销毁、调度都是有开销的，不可能不停地创建。
+而使用Blocking IO时，主线程在接受一个连接后，会阻塞在调用处等待数据就绪，期间无法处理其它连接请求。一个阻塞IO实现的socket server参见*code/socket_server_blocking.cpp*。解决该问题可以借助多线程/多进程。主线程在accept之后创建一个线程执行read和write操作，然后马上返回accept处，等待新的连接请求。这个解决方案可以处理并发连接，但是线程作为操作系统的资源，创建、销毁、调度都是有开销的，不可能不停地创建。
 
 使用线程池复用线程能不能解决问题呢？我们创建一个包含若干个线程的线程池，主线程作为生产者，负责接收连接请求，并将其放入队列中。线程池作为消费者，从队列中取出连接进行处理。这依然不是个合格的方案，线程池有n个线程，就最多响应n个并发连接，想要承担上万的并发连接量就需要上万个线程，这对操作系统来说是很大的压力。在这种多线程方案中，等待IO的开销并没有因为使用线程池而减少，只是转嫁给了处理线程。
 
 想要提高并发处理能力，要解决的根本问题是**高效地等待IO就绪**。做到这点，需要使用内核实现的IO多路复用(I/O multiplexing)机制。这一机制将等待的工作移到了内核当中，内核代码和驱动通过更高效的实现降低在等待上耗费的无用功。
 
-POSIX最早提供的阻塞IO多路复用调用是[select](http://linux.die.net/man/2/select)。它可以帮助应用程序同时监听多个socket上的可读、可写事件，当有socket可读可写时返回这些socket。
+POSIX最早提供的阻塞IO多路复用调用是[select](http://linux.die.net/man/2/select)，它可以同时监听多个socket上的可读/可写事件。一个使用select多路复用的socket server参见*code/socket_server_select.cpp*。多路复用的执行流程如下：
 
-```cpp
-std::set<int> connFds;
-int maxFd = -1;
-int listenFd = -1；
-int maxFd = listenFd;
-fd_set readFdSet, allFdSet;
-FD_ZERO(&allFdSet);
-// 1. Add listening socket to socket set to be monitored. 
-FD_SET(listenFd, &allFdSet);
-for ( ; ; ) 
-{
-    // 2. Add all socket we want to read data from to read fd set.       
-    maxFd = -1;
-    std::set<int>::iterator ite = connFds.begain();
-    for (; ite != connFds.end(); ite++) 
-    {
-        FD_SET(*ite, &readFdSet);
-        if(*ite > maxFd) {maxFd = *ite;}
-    }
-    
-    // 3. Let select to monitor all sockets in readFdSet.
-    select(maxFd + 1, &readFdSet, NULL, NULL, NULL);
+1. 用户注册感兴趣的socket fd到监听集合，开始事件循环。
+2. 调用多路复用API(select等)监听事件。
+3. 有socket fd上数据就绪时select返回，并通知用户就绪的fd。
+4. 用户在就绪的fd上执行读写操作。
+5. 回到1，重新开始事件循环。
 
-    // 4. After select returns. If listenFd still left in readSocketSet, new connection found.
-    if (FD_ISSET(listenfd, &rset)) 
-    {
-        // 3. accept new connection. The accept will never block.
-        clilen = sizeof(cliaddr);
-        int connFd = accept(listenFd, (SA *)&cliaddr, &clilen);
-        connFds.insert(connFd);
-
-        FD_SET(connFd, &allFdSet);	/* add new descriptor to set */
-    }
-
-    // 5. Test all connection sockets to see if they are in readFdSet. If it is in, data is ready to read.
-    std::set<int>::iterator ite = connFds.begain();
-    for (; ite != connFds.end(); ite++) 
-    {
-        if(FD_ISSET(*ite, &readFdSet)) 
-        {
-            // 6. Read some bytes. The read will never block.
-            int dataRecv = 0;
-            read(*ite, &dataRecv, sizeof(dataRecv);
-            ...
-        }
-    }
-}
-```
-
-相较阻塞IO，select多路复用能够处理更高的并发连接数，足够应付一些要求没那么高的场景。不过，它缺点也还是有：
+相比阻塞IO+多线程模式，select多路复用能够处理更高的并发连接数，足够应付一些要求没那么高的场景。不过，它缺点也还是有：
 
 * 监听socket数目受限。fd_set是一个bit数组，这个数组的大小是定义在内核代码中的一个宏，默认值为1024。这导致select能够同时监听的socket数目是受限的。
 
 * 低效地轮询。这点从select函数的参数中就能看出端倪。[select](http://linux.die.net/man/2/select)函数的第一个参数是需要监听的最大的socket id，每次select调用系统采用轮询的方式逐个检查这些socket中有无就绪。如果没有这个最大id，内核就要遍历整个socket id的取值范围。该参数缓解了问题，但没有彻底解决问题，一旦有某个socket id很大，这种优化就失效了。另外，每次select返回时就绪的socket很可能只占监视集合的很小一部分，遍历所作的无用功其实很多。
 
-2002年，Linux 2.5.44版本内核包含了另一个多路复用API：[epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)，它的出现解决了select的问题。epoll的出色性能使它很长一段时间内都是Linux上实现高并发服务的首选方案。
+2002年，Linux 2.5.44版本内核包含了另一个IO多路复用API [epoll](http://man7.org/linux/man-pages/man7/epoll.7.html)，它的出现解决了select的问题。epoll的出色性能使它很长一段时间内都是Linux上实现高并发服务的首选方案。
 
 * epoll所支持的fd上限是最大可以打开文件句柄数。
 * 内核在epoll的实现上，取消了内部等待进程对socket就绪事件的轮询，采用设备就绪时回调的方式将就绪的socket加入就绪列表。
 
-```cpp
-_epollfd = ::epoll_create(10);
 
-// Monitor read event on listen socket.
-struct epoll_event event;
-event.data.fd = _listen_fd;   
-event.events = EPOLLIN;
-::epoll_ctl(_epollfd, EPOLL_CTL_ADD, _listen_fd, &event)
-
-for (;;)
-{
-    int nfds = ::epoll_wait(_epollfd, _events, MAX_EVENTS, -1);
-    for (int i = 0; i < nfds; i++)
-    {
-        int fd = _events[i].data.fd;
-        if ((_events[i].events & EPOLLERR) || (_events[i].events & EPOLLHUP))
-        {
-            // an error has occured on this fd, or the socket is not ready for reading.
-            close(fd);
-            continue;
-        }
-        else if (_listen_fd == fd)
-        {
-            // we have a notification on the listening socket, which means one or more incoming connections. */
-            while (true)
-            {
-                struct sockaddr in_addr;
-                char hbuf[NI_MAXHOST], sbuf[NI_MAXSERV];
-                socklen_t in_len = sizeof(in_addr);
-                int infd = ::accept(_listen_fd, &in_addr, &in_len);
-                struct epoll_event event;
-                event.data.fd = infd;
-                // only monitor err initially.
-                event.events = EPOLLERR | EPOLLHUP;
-                epoll_ctl(_epollfd, EPOLL_CTL_ADD, infd, &event);
-            }
-        }
-        else
-        {
-            // a read or write event happens, read or write some data.
-        }
-    }
-}
-```
-
-使用不同的IO多路复用机制在实现高并发server时，代码模式是类似的：
-
-1. 在一个事件循环中，用户在注册感兴趣的fd和事件。
-2. 多路复用API（select/epoll等）利用内核机制负责监听事件。
-3. 事件发生后返回，并通知用户发生事件的fd及发生了何种事件。
-4. 回到1，重新开始事件循环。
 
 ## 异步IO
 
@@ -190,66 +97,12 @@ for (;;)
 * libevent。轻量级，C风格。libevent的设计风格和POSIX APIs一脉相承，比较薄的一层封装，接口不多不少，深得开发人员喜爱，Redis和MemeryCached的网络操作都是基于它的。
 * boost::asio。较libevent重量，C++面向对象风格。
 
-下面是一个用boost::asio的异步回调APIs实现的[echo server](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_asio/example/cpp11/echo/async_tcp_echo_server.cpp)。io_service是一个经过封装的IO多路复用器。client/server的交互流程是：
+一个基于boost::asio异步回调APIs实现的[echo server](https://www.boost.org/doc/libs/1_74_0/doc/html/boost_asio/example/cpp11/echo/async_tcp_echo_server.cpp)参见*code/socket_server_asio.cpp*。io_context是一个经过封装的IO多路复用器。client/server的交互流程是：
 
-1. server对象构造函数调用start_accept，向acceptor注册完成事件回调server::handle_accept。
-2. accept完成后，handle_accept将会被调用，执行session::start函数，同时再次调用start_accept用于监听新的连接。
-3. session::start中，async_read_some向io_service注册数据读取完毕的回调函数session::handle_read。
-4. 数据读完成后，session::handle_read被调用，其中调用async_write，向io_service注册数据写完毕回调函数session::handle_write。
-5. 数据写完成后，session::handle_write被调用，其中再次调用async_read_some，向io_service注册数据读完毕回调函数session::handle_read，继续读取数据。
-
-```cpp
-#include <iostream>
-#include <string>
-#include <boost/asio.hpp>
-#include <boost/bind.hpp>
-#include <boost/smart_ptr.hpp>
-
-using namespace boost::asio;
-using boost::system::error_code;
-using ip::tcp
-
-void accept_handler(boost::shared_ptr<tcp::socket> psocket, error_code ec)
-{
-    if(ec) return;
-
-    start();
-
-    boost::shared_ptr<std::string> pstr(new std::string("hello async world!"));
-    psocket->async_read_some(buffer(*pstr),
-     boost::bind(&read_done_handler, this, pstr, _1, _2)
-     );
-}
-
-void read_done_handler(boost::shared_ptr<tcp::socket> psocket, error_code ec)
-{
-    if(ec) return;
-
-    boost::shared_ptr<std::string> pstr(new std::string("hello async world!"));
-    psocket->async_write_some(buffer(*pstr),
-     boost::bind(&write_done_handler, this, pstr, _1, _2)
-     );
-}
-
-void write_done_handler(boost::shared_ptr<std::string> pstr, error_code ec, size_t bytes_transferred)
- {
-    if(ec) { std::cout<< "send failed!" << std::endl; }
-    else {std::cout<< *pstr << "sent." << std::endl; }
- }
-
-int main(int argc, char* argv[])
-{
-    io_service &iosev;
-    ip::tcp::acceptor acceptor;
-    
-    boost::shared_ptr<tcp::socket> psocket(new tcp::socket(iosev));
-    acceptor.async_accept(*psocket, boost::bind(&accept_handler, this, psocket, _1) );
-    
-    iosev.run();
-
-    return 0;
-}
-```
+1. server通过acceptor发起新连接处理任务，并注册回调函数`on_accept_done`。
+2. 新连接建立时，`on_accept_done`被执行，它发起一次数据读取任务，并注册读取完成的回调函数`on_read_done`，接着再次发起新连接处理任务。
+3. 数据读取完成后，`on_read_done`被执行，它发起一次数据发送任务，并注册发送完成的回调函数`on_write_done`。
+4. 一次连接处理完成。
 
 ## 使用协程
 
