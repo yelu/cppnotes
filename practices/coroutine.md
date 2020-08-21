@@ -154,8 +154,40 @@ Linus的一封邮件[Linux-Kernel Archive: Re: proc fs and shared pids](fs_and_s
 * 内核调度执行的基本单位是线程、而非进程。每个进程都有自己的运行状态(state)、优先级、寄存器等，是OS调度的基本单位。
 * 进程包含一个或多个线程。同一进程下的各个线程共享资源(address space、open files、signal handlers，etc)，但寄存器、栈等不共享。
 
-## 附录 II Promise和Future
+## 附III Promise和Future
 
-异步通常需要多线程，以及在进程间传递数据。Promise和Future是在多线程间传递数据的常见模式之一。
+实现异步机制通常需要用到多线程，并在线程间传递数据。Promise和Future是实现数据传递的常见模式之一，已经被C++标准库[支持](https://en.cppreference.com/w/cpp/thread/future)。
 
-一个`Promise<T>`对象和一个`Future<T>`对象总是一一对应的。Promise“承诺”未来某个时候产出T类型的数据，与之关联的`Future<T>`对象可以通过`as_future`接口获得，通过`Future<T>::get_data()`获取数据的操作会被阻塞，直到“未来”某个时候数据被Promise产出。
+![Promise and Future](promise_and_future.jfif)
+
+`Promise<T>`对象总是关联一个`Future<T>`对象。Promise“承诺”未来某个时候产出一个T类型的数据，通过与之关联的`Future<T>`对象可以在“未来”某个时候获取该数据。Promise和Future之间的关系就像生产者和消费者。
+
+```cpp
+#include <iostream>
+#include <thread>
+#include <future>
+
+using namespace std;
+
+void wait_for_data(const future<int>& f) {
+  // blocking until data available
+  int data = f.get();  
+  cout << "data received" << endl;
+}
+
+void make_data(promise<int>& p) {
+    cout << "task completed, data ready" << endl;
+    p.set_value(1);
+}
+
+int main() {
+    promise<int> p;
+    future<int> f = p.get_future();
+    thread consumer(wait_for_data, f);
+    thread producer(make_data, p);
+    consumer.join();
+    producer.join();
+
+    return 0;
+}
+```

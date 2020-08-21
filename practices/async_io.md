@@ -12,7 +12,7 @@
 (ClientAddr:ClientPort, ServerAddr:ServerPort)
 ```
     
-![Hardware and Software Organization of Internet Application](tcpip_socket.png)
+![Hardware/Software Organization of Socket Communication](tcpip_socket.png)
 
 操作socket的一组最有名的API是[Berkeley Socket APIs](http://en.wikipedia.org/wiki/Berkeley_sockets#Socket_API_functions)。它最早于1983年在BSD Unix 4.2上发布。然而，由于AT&T的专利保护着UNIX，到1989年Berkeley大学才能够自由地发布它们。其设计简单、实用，后来逐渐成为了网络socket操作的事实标准。包含的主要函数有：
 
