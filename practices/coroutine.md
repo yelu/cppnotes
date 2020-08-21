@@ -153,3 +153,9 @@ Linus的一封邮件[Linux-Kernel Archive: Re: proc fs and shared pids](fs_and_s
 * 进程是资源的容器。进程的资源包括程序(program text)、数据(data)、文(opened files)等资源。一个进程拥有对这些资源的所有权，OS则提供保护功能，避免不同进程之间的资源冲突。
 * 内核调度执行的基本单位是线程、而非进程。每个进程都有自己的运行状态(state)、优先级、寄存器等，是OS调度的基本单位。
 * 进程包含一个或多个线程。同一进程下的各个线程共享资源(address space、open files、signal handlers，etc)，但寄存器、栈等不共享。
+
+## 附录 II Promise和Future
+
+异步通常需要多线程，以及在进程间传递数据。Promise和Future是在多线程间传递数据的常见模式之一。
+
+一个`Promise<T>`对象和一个`Future<T>`对象总是一一对应的。Promise“承诺”未来某个时候产出T类型的数据，与之关联的`Future<T>`对象可以通过`as_future`接口获得，通过`Future<T>::get_data()`获取数据的操作会被阻塞，直到“未来”某个时候数据被Promise产出。
