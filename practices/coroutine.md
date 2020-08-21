@@ -172,7 +172,7 @@ using namespace std;
 void wait_for_data(const future<int>& f) {
   // blocking until data available
   int data = f.get();  
-  cout << "data received" << endl;
+  cout << "received" << data << endl;
 }
 
 void make_data(promise<int>& p) {
