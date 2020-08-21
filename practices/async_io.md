@@ -25,15 +25,9 @@
 
 ## 阻塞和非阻塞IO
 
-基于BSD Socket APIs，client和server的交互流程如下图。在服务器端，完成一次通信需要五步：
+基于BSD Socket APIs，client和server的交互流程如下图。服务器端建立监听socket `listen_fd`，通过bind将listen_fd绑定到端口上，之后开始在listen_fd上进行监听， 一旦有client连接，accept会返回一个新的socket `conn_fd`。client和server分别通过对client_fd和conn_fd的read/write实现彼此间数据的收发。
 
-1. 建立监听socket listen_fd。
-2. 通过bind将listen_fd绑定到端口上。
-3. 开始在listen_fd上进行监听。
-4. 一旦有client连接，listen操作就会返回。此时调用accept会返回一个新的socket conn_fd。
-5. 通过对conn_fd的read/write实现从client收发数据。
-
-![TCP Workflow](./TCPWorkflow.png)
+![C/S Comm. with Socket](./bsd_socket_api.png)
 
 `read`和`write`等socket IO操作，有两种工作模式：阻塞(Blocking)和非阻塞(Non-blocking)。
 
