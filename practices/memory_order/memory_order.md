@@ -4,18 +4,18 @@
 
 下面这段有名的代码常用来展示一种错误的多线程通信模式。假设我们能确保对is_ready的读写是原子的（x86平台保证对齐的int读写是原子的），这段代码能够如预期那样工作吗？如果你的答案是可以，那你就需要继续读下去。
 
-```C++
+```cpp
 int message = 0;
 int is_ready = 0;
 
-// thread 1 : send a message.
+// thread 1: send a message
 void send_message()
 {
     message = 42;   // (1)
     is_ready = 1;   // (2)
 }
 
-// thread 2 : receive the message sent by thread 1.
+// thread 2: receive the message sent by thread 1
 int try_recv_message()
 {
     if(is_ready == 0){ return -1; }    // (3)
@@ -57,13 +57,13 @@ int try_recv_message()
 用于控制编译器乱序优化的指令通常称为“编译器栅栏”（compiler barrier/fence）。下面第5行的汇编语句就是常见的GCC栅栏指令，它会阻止编译器将其前后的代码移向另一侧。
 
 
-```asm
-int A, B;
-void Foo()
+```cpp
+int a, b;
+void foo()
 {
-    A = B + 1;
+    a = b + 1;
     asm volatile("" ::: "memory");
-    B = 0;
+    b = 0;
 }
 ```
 
@@ -71,7 +71,7 @@ void Foo()
 
 用于控制运行时代码乱序的指令通常称为“内存栅栏”（memory barrier/fence,CPU barrier/fence）。memory barrier通常也兼有compiler barrier的作用，而反过来compiler barrier是无法阻止运行时乱序的。实际上，在汇编代码中compiler barrier就已经不存在了。因此，多数时候，我们需要的是memory barrier。以下代码第4行的汇编指令就是GCC（PowerPC）的memory barrier指令，它会阻止位于它之前的代码跨越栅栏后的第一个写操作。
 
-```C++
+```cpp
 void send_value(int x)
 {
     value = x;
@@ -97,7 +97,7 @@ Memory barrier的类型有很多，最基本的有四类。[Memory Barriers Are 
 下面例子的第2行使用了C++ 11标准提供的栅栏指令，通过这个例子，我们来熟悉下上面的这些概念。
 
 
-```C++
+```cpp
 tmp = new Singleton;
 std::atomic_thread_fence(std::memory_order_release);
 m_instance = tmp;
@@ -115,7 +115,7 @@ m_instance = tmp;
 以下代码是对上面例子的另外一种实现，通过它我们认识下Acquire/Release semantic。第2行对m_instance的赋值，被称为“具有（或实现了）Release semantic”，它在对m_instance赋值的同时阻止了之前的代码向下穿越。这种实现了acquire/release semantic的操作被称为Acquire/Release operation。这些概念经常被搞混[[link]](http://preshing.com/20131125/acquire-and-release-fences-dont-work-the-way-youd-expect/)[[cache]](Acquire_and_Release_Fences_Dont_Work_the_Way_Youd_Expect.html)，需要格外注意用词。
 
 
-```C++
+```cpp
 tmp = new Singleton;
 m_instance.store(tmp, std::memory_order_release);
 ```
@@ -182,7 +182,7 @@ int message = 0;
 int is_ready = 0;
 std::mutex mtx;
 
-// thread 1 : Send a message.
+// thread 1: Send a message
 void send_message()
 {
     std::lock_guard<std::mutex> lck (mtx);
@@ -190,7 +190,7 @@ void send_message()
     is_ready = 1;   // (2)
 }
 
-// thread 2 : Receive the message sent by thread 1.
+// thread 2: Receive the message sent by thread 1
 void try_recv_message()
 {
     std::lock_guard<std::mutex> lck (mtx);
@@ -223,14 +223,14 @@ void try_recv_message()
 std::atomic<int> message = 0;
 std::atomic<int> is_ready = 0;
 
-//Thread 1 : Send a message.
+// thread 1: send a message
 void send_message()
 {
     message.store(42, memory_order_seq_cst);   // (1)
     is_ready.store(1, memory_order_seq_cst);   // (2)
 }
 
-//Thread 2 : Receive the message sent by thread 1.
+// thread 2: receive the message sent by thread 1
 void try_recv_message()
 {
     if(0 == is_ready.load(memory_order_seq_cst)){return;}      // (3)
