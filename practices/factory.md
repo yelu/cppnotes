@@ -100,7 +100,7 @@ public:
 REGISTER_TYPE("Santana", Santana::Santana);
 ```
 
-Bartek在[blog](Bartek_Factory_With_Self_Registering_Types.html)中提出了另一种更加自动的注册机制，这种机制优雅的地方在于它将注册动作隐藏在了一个基类当中，只要继承就可以自动被注册。这个方法对用户比较友好，不过背后涉及了稍多一些的细节，采用需要权衡。
+Bartek在blog post里[[cache]](Bartek_Factory_With_Self_Registering_Types.html)[[link]](https://www.bfilipek.com/2018/02/factory-selfregister.html)提出了另一种更加自动的注册机制，这种机制优雅的地方在于它将注册动作隐藏在了一个基类当中，只要继承就可以自动被注册。这个方法对用户比较友好，不过背后涉及了稍多一些的细节，采用需要权衡。
 
 ```cpp
 
@@ -109,8 +109,7 @@ class AutoRegister
 {
   protected:
     static bool registered;
-    virtual ~AutoRegister()
-    {
+    virtual ~AutoRegister() {
         (void)registered;
     } // <-- just to prevent the optimization
 

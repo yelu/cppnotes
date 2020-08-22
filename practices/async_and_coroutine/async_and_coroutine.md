@@ -6,7 +6,7 @@ Coroutine是C++ 20中提供的新特性。促使C++ Coroutine产生的直接需�
 
 ## 异步
 
-奶茶店人很多，等不及的顾客下完单离开逛商场，奶茶制作完成后店家通过小程序通知顾客来取。这就是异步的全部，和代码中的异步在概念上没有区别。
+奶茶店人很多，等不及的顾客下完单离开逛商场，店家制作完成后通过小程序通知顾客来取。这就是异步的全部，和代码中的异步在概念上没有区别。
 
 促使异步模式被采用的动机通常是有些操作执行速度太慢，调用方无法接受一直等待下去，不得不放弃等待。异步执行耗时任务的常见模式是，维持一个任务队列(Task Queue)和后台线程池(Worker Thread Pool)。Worker Thread不停地从队列中拿任务执行，执行完成后通过callback或者完成队列通知调用方。通过将任务交给线程池执行，调用方不会再被阻塞在调用处。
 
@@ -101,7 +101,7 @@ Erlang的并发思想在go语言身上重新焕发了生机。Go的设计目标�
 
 ## 附I 《面向软件错误构建可靠的分布式系统》
 
-Joe amstrang在他的博士论文[Making Reliable Distributed Systems in the Presence of Software Errors](joe_armstrong_making_reliable_distributed_systems_in_the_presence_of_software_errors.pdf)中对Erlang的设计哲学给出了阐释，总结起来，有三个重点。
+Joe amstrang(1950-2019)在他的博士论文[Making Reliable Distributed Systems in the Presence of Software Errors](joe_armstrong_making_reliable_distributed_systems_in_the_presence_of_software_errors.pdf)中对Erlang的设计哲学给出了阐释，总结起来，有三个重点。
 
 **第一，故障隔离。**
 
