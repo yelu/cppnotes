@@ -30,19 +30,19 @@ C++是不支持反射的语言，要做到这一点就需要对一个个类型�
 以上分支判断实现的一个不好的地方是，在增加新的类型时需要不停地添加新的分支判断代码。为了缓解这一问题代码的麻烦，可以用一个字典保存类型字符串到构造函数的映射表。
 
 ```cpp
-typedef Object* (*ObjConstructor)();
-std::unordered_map<std::string, ObjConstructor> constructor_dict;
+typedef Object* (*Ctor)();
+std::unordered_map<std::string, Ctor> ctor_dict;
 
-void register(const char* type_name, OpConstructor op_constructor)
+void register(const char* type_name, Ctor ctor)
 {
-    constructor_dict[type_name] = op_constructor;
+    ctor_dict[type_name] = ctor;
 }
 
 Object* create(const std::string& type_name)
 {
-    const auto& ite = constructor_dict.find(type_name);
+    const auto& ite = ctor_dict.find(type_name);
 
-    if (ite != constructor_dict.end()) {
+    if (ite != ctor_dict.end()) {
         return (*(ite->second))();
     } else {
         throw std::runtime_error("class is not registered");
@@ -58,6 +58,73 @@ Object* create(const std::string& type_name)
 ## 自动注册
 
 对于一个需要被不停地维护和扩展的框架来说，因为添加新的类型，经常需要修改工厂类本身的实现确实不是个特别好的设计。如果能让注册代码脱离于工厂类之外，是更好的选择。
+
+想要在代码进入main函数之前注册好所有工厂类，需要利用静态全局对象的初始化来间接完成。
+
+```cpp
+struct AutoRegister
+{
+    AutoRegister(const char* type_name, Ctor ctor)
+    {
+        register(type_name, ctor);
+    }
+};
+
+class Santana {
+public:
+    Santana() {}
+}
+
+static AutoRegister auto_reg("Santana", Santana::Santana);
+```
+
+为了简化机械重复的注册逻辑，一般会通过定义宏的方式实现。为了支持在同一个源文件中注册多个类型，还需要处理一下变量名等细节。
+
+```cpp
+struct AutoRegister
+{
+    AutoRegister(const char* type_name, Ctor ctor)
+    {
+        register(type_name, ctor);
+    }
+};
+
+class Santana {
+public:
+    Santana() {}
+}
+
+#define REGISTER_TYPE_NAME(T) reg_type_##T##_
+#define REGISTER_TYPE(type_name, T) static AutoRegister REGISTER_TYPE_NAME(T)(type_name, T::T);
+
+REGISTER_TYPE("Santana", Santana::Santana);
+```
+
+Bartek在[blog](Bartek_Factory_With_Self_Registering_Types.html)中提出了另一种更加自动的注册机制，这种机制优雅的地方在于它将注册动作隐藏在了一个基类当中，只要继承就可以自动被注册。这个方法对用户比较友好，不过背后涉及了稍多一些的细节，采用需要权衡。
+
+```cpp
+
+template<typename T>
+class AutoRegister
+{
+  protected:
+    static bool registered;
+    virtual ~AutoRegister()
+    {
+        (void)registered;
+    } // <-- just to prevent the optimization
+
+    static Operator* CreateInstance() { return new T(); };
+};
+
+template<typename T>
+bool AutoRegister<T>::registered =
+  OpFactory::Register(typeid(T).name(), T::GetTypeName().c_str(), &(AutoRegister<T>::CreateInstance));
+```
+
+## 作为插件注册
+
+[build a plugin system](https://sourcey.com/articles/building-a-simple-cpp-cross-platform-plugin-system)
 
 ## 练习
 
