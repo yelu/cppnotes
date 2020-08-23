@@ -74,7 +74,7 @@ public:
 
 struct AutoRegister
 {
-    AutoRegister(const char* type_name, Ctor ctor)
+    AutoRegister(const string& type_name, Ctor ctor)
     {
         reg_type(type_name, ctor);
     }
