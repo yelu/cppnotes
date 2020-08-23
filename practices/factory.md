@@ -31,7 +31,7 @@ Object* Factory::create_object(string type_name) {
 }
 ```
 
-对工厂方法的一个疑问是，为什么我们不能调用构造函数，非要用一个工厂来创建呢？导致类的构造函数不可用的原因有很多，比如对象被序列化到了磁盘文件上，后续通过文件反序列化时，必然面临通过类型标识创建对象的需求。面临这一问题的多是一些可扩展的框架或者插件系统。
+对工厂模式的一个疑问是，为什么我们不能调用构造函数，非要用一个工厂来创建呢？导致类的构造函数不可用的原因有很多，比如对象被序列化到了磁盘文件上，后续通过文件反序列化时，必然面临通过类型标识创建对象的需求。面临这一问题的多是一些可扩展的框架或者插件系统。
 
 ## 类型注册
 
@@ -66,11 +66,14 @@ Object* create(const string& type_name)
 第二步，注册代码需要脱离工厂类，最好由商品类自己源文件中的代码负责注册自己。为了在代码进入main函数之前触发商品类注册操作，常用的手法是利用静态全局对象的初始化机制间接完成。
 
 ```cpp
-// File: santana.cpp
+// File: santana.h
 class Santana: public Object {
 public:
     Santana() {}
 }
+
+// File: santana.cpp
+#include "santana.h"
 
 struct AutoRegister
 {
@@ -100,14 +103,12 @@ static AutoRegister auto_reg("Santana", [](){ new Santana(); });
 
 // File: santana.cpp
 #include "factory.h"
-
-class Santana: public Object {
-public:
-    Santana() {}
-}
+#include "santana.h"
 
 REGISTER_TYPE("Santana", [](){ new Santana(); });
 ```
+
+`auto_reg`初始化时会调用函数`reg_type`，该函数会访问另一个全局变量`ctor_dict`。编译器能否按照正确的顺序初始化这些有依赖关系的全局和静态变量，是这个方法面临的一个风险。
 
 现在，我们成功分离了工厂模式包含的两个部分：工厂管理类和商品类注册。在增加新的商品类时工厂类源代码能够保持不变，商品类的注册逻辑也分散在了每个商品类自身的源文件当中。
 
@@ -131,12 +132,14 @@ class AutoRegister
     };
 };
 
+// static member of template class should be initialized
+// in hear file, not source file.
 template<typename T>
 bool AutoRegister<T>::registered = reg_type(
     T::type_name(), 
     &(AutoRegister<T>::create_object));
 
-// File: santana.cpp
+// File: santana.h
 class Santana: 
     public Object,
     public AutoRegister<Santana> {
