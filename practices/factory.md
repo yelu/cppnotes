@@ -1,109 +1,120 @@
 # 工厂模式
 
-[Factory With Self-Registering Types](https://www.bfilipek.com/2018/02/factory-selfregister.html)
+现实中，工厂负责生产产品。代码里，工厂模式负责创建（商品）类的实例化对象。对象的构造是由构造函数完成的，工厂方法允许调用者不直接接触类的构造函数，而是通过某种类型标识间接创建对应类型的对象。在设计模式里，这种模式被称为“简单工厂模式”。工厂模式的实现对商品类的基本要求是它们需要有共同的基类。
 
-现实中，工厂负责生产产品。程序世界里，工厂模式负责创建类的实例化对象。类的构造是由其构造函数完成的，工厂方法允许调用者不接触类的构造函数，通过特定的标识创建对应类型的对象。在设计模式里，这种模式被称为“简单工厂模式”。
-
-这个问题对于支持反射的语言来说，几乎不算是个问题，简单工厂模式被语言本身直接提供了。
+对于支持反射的语言来说，简单工厂模式被语言直接提供了。
 
 ```csharp
-public object CreateInstance(string className)
+// C#
+public object CreateInstance(string typeName)
 {         
-    Type t = Type.GetType(className);
+    Type t = Type.GetType(typeName);
     return  Activator.CreateInstance(t);
 }
 
 ```
 
-C++是不支持反射的语言，要做到这一点就需要对一个个类型进行条件判断。
+C++是不支持反射的语言，做到这一点需要逐个对商品类型进行条件判断。
 
 ```cpp
-// 简单工厂
+// File: factory.cpp
+Object* Factory::create_object(string type_name) {
+    if (type_name == "Santana") {
+        return new Santana();
+    }
+    else if(type_name == "Toyota") {
+        return new Toyota();
+    }
+    else {
+        return nullptr;
+    }
+}
 ```
 
-简单工厂经常被诟病的一点是，没次增加一个新的“商品”种类，都需要修改工厂代码，于是更“高级”的工厂模式产生了。但是，这种简单直接的模式实际上非常易于理解，一眼就能望见所有实现细节，对于更新工厂方法不介意的场景是应该优优先考虑采用的。
-
-对工厂方法的一个疑问是，为什么我们不能调用构造函数，非要用一个工厂来创建呢？这里面很重要的一个应用场景是一些可扩展的框架。这些框架的设计通常有一个很重要的问题需要解决，那就是通过字符串来创建类对象。导致类的构造函数不可用的原因有很多，比如类对象被序列化到了磁盘上，后续需要通过文件中的字符串来恢复对象。
+对工厂方法的一个疑问是，为什么我们不能调用构造函数，非要用一个工厂来创建呢？导致类的构造函数不可用的原因有很多，比如对象被序列化到了磁盘文件上，后续通过文件反序列化时，必然面临通过类型标识创建对象的需求。面临这一问题的多是一些可扩展的框架或者插件系统。
 
 ## 类型注册
 
-以上分支判断实现的一个不好的地方是，在增加新的类型时需要不停地添加新的分支判断代码。为了缓解这一问题代码的麻烦，可以用一个字典保存类型字符串到构造函数的映射表。
+简单工厂模式就像它的名字，简单直接，非常易于理解，一眼就能望见所有实现细节，在一些轻量级的应用中，应该优优先考虑采用。
+
+在简单工厂模式中，每增加一个新的“商品”种类，就需要添加新的分支判断逻辑，导致工厂类本身的源代码需要频繁被修改。对一个需要持续维护和扩展的框架来说，这确实不是个特别好的设计。为了缓解问题，需要实现某种更动态的类型注册机制。
+
+第一步，用一个字典保存类型字符串到构造函数的映射。实现上的一点要求是，对象的创建函数需要绑定到一个统一的签名上去，例如下面的`Object* (*Ctor)()`。
 
 ```cpp
+// File: factory.cpp
 typedef Object* (*Ctor)();
-std::unordered_map<std::string, Ctor> ctor_dict;
+unordered_map<string, Ctor> ctor_dict;
 
-void register(const char* type_name, Ctor ctor)
+void reg_type(const string& type_name, Ctor ctor)
 {
     ctor_dict[type_name] = ctor;
 }
 
-Object* create(const std::string& type_name)
+Object* create(const string& type_name)
 {
     const auto& ite = ctor_dict.find(type_name);
 
     if (ite != ctor_dict.end()) {
         return (*(ite->second))();
     } else {
-        throw std::runtime_error("class is not registered");
+        throw runtime_error("type is not registered");
     }
 }
 ```
 
-这一实现需要被创建的工厂类慢则一定的要求：
+第二步，注册代码需要脱离工厂类，最好由商品类自己源文件中的代码负责注册自己。想要在代码进入main函数之前执行商品类注册操作，可以利用静态全局对象的初始化间接完成。
 
-* 有共同的基类。这是所有工厂方法的共同要求。
-* 构造函数签名一致。
+```cpp
+// File: santana.cpp
+class Santana: public Object {
+public:
+    Santana() {}
+}
+
+struct AutoRegister
+{
+    AutoRegister(const char* type_name, Ctor ctor)
+    {
+        reg_type(type_name, ctor);
+    }
+};
+
+static AutoRegister auto_reg("Santana", [](){ new Santana(); });
+```
+
+为了简化机械重复的注册逻辑，一般会将上面的注册代码定义成宏。
+
+```cpp
+// File: factory.h
+#define REGISTER_TYPE(type_name, ctor) \
+    struct AutoRegister \
+    { \
+        AutoRegister(const string& type_name, Ctor ctor) \
+        { \
+            reg_type(type_name, ctor); \
+        } \
+    }; \
+    \
+    static AutoRegister prod_type_##T##(type_name, ctor);
+
+// File: santana.cpp
+#include "factory.h"
+
+class Santana: public Object {
+public:
+    Santana() {}
+}
+
+REGISTER_TYPE("Santana", [](){ new Santana(); });
+```
 
 ## 自动注册
 
-对于一个需要被不停地维护和扩展的框架来说，因为添加新的类型，经常需要修改工厂类本身的实现确实不是个特别好的设计。如果能让注册代码脱离于工厂类之外，是更好的选择。
-
-想要在代码进入main函数之前注册好所有工厂类，需要利用静态全局对象的初始化来间接完成。
+Bartek在一篇blog post里[[cache]](Bartek_Factory_With_Self_Registering_Types.html)[[link]](https://www.bfilipek.com/2018/02/factory-selfregister.html)提出了另一种更加自动的注册机制，这种机制优雅的地方在于它将注册动作隐藏在了一个基类当中，只要继承就可以自动被注册。这个方法背后涉及更多的技术细节，采用与否需要进行权衡。
 
 ```cpp
-struct AutoRegister
-{
-    AutoRegister(const char* type_name, Ctor ctor)
-    {
-        register(type_name, ctor);
-    }
-};
-
-class Santana {
-public:
-    Santana() {}
-}
-
-static AutoRegister auto_reg("Santana", Santana::Santana);
-```
-
-为了简化机械重复的注册逻辑，一般会通过定义宏的方式实现。为了支持在同一个源文件中注册多个类型，还需要处理一下变量名等细节。
-
-```cpp
-struct AutoRegister
-{
-    AutoRegister(const char* type_name, Ctor ctor)
-    {
-        register(type_name, ctor);
-    }
-};
-
-class Santana {
-public:
-    Santana() {}
-}
-
-#define REGISTER_TYPE_NAME(T) reg_type_##T##_
-#define REGISTER_TYPE(type_name, T) static AutoRegister REGISTER_TYPE_NAME(T)(type_name, T::T);
-
-REGISTER_TYPE("Santana", Santana::Santana);
-```
-
-Bartek在blog post里[[cache]](Bartek_Factory_With_Self_Registering_Types.html)[[link]](https://www.bfilipek.com/2018/02/factory-selfregister.html)提出了另一种更加自动的注册机制，这种机制优雅的地方在于它将注册动作隐藏在了一个基类当中，只要继承就可以自动被注册。这个方法对用户比较友好，不过背后涉及了稍多一些的细节，采用需要权衡。
-
-```cpp
-
+// File: factory.h
 template<typename T>
 class AutoRegister
 {
@@ -111,17 +122,40 @@ class AutoRegister
     static bool registered;
     virtual ~AutoRegister() {
         (void)registered;
-    } // <-- just to prevent the optimization
+    } // <-- just to prevent optimization
 
-    static Operator* CreateInstance() { return new T(); };
+    static Object* create_object() { 
+        return new T(); 
+    };
 };
 
 template<typename T>
-bool AutoRegister<T>::registered =
-  OpFactory::Register(typeid(T).name(), T::GetTypeName().c_str(), &(AutoRegister<T>::CreateInstance));
+bool AutoRegister<T>::registered = reg_type(
+    T::type_name(), 
+    &(AutoRegister<T>::create_object));
+
+// File: santana.cpp
+class Santana: 
+    public Object,
+    public AutoRegister<Santana> {
+public:
+    Santana() {}
+    static std::string type_name() {
+        return string("Santana");
+    };
+}
 ```
 
-## 作为插件注册
+## 从独立的动态库中注册
+
+工厂模式的实现包含两个部分：工厂管理类和商品类注册。我们已经成功分离了二者，在增加新的商品类时工厂类源代码能够保持不变，商品类的注册逻辑也成功分散在了每个商品类自身的源文件当中。理论上讲，如果将商品类编译为一个独立的动态库，无需任何变动，动态库加载时目前就可以做到自动注册商品类，不过这中间还有一些细节需要注意。
+
+工厂类和商品类之间的交互涉及到几个函数，这几个函数应该导出为C APIs来避免跨二进制边界时的ABI兼容性问题。如果商品插件和工厂类是受控的，即可以保证经由相同的编译器和编译参数编译，则可以忽略该问题。
+
+* 工厂类的类型注册函数`reg_create`，会被商品动态库调用。
+* 商品类的创建函数`typedef Object* (*Ctor)();`，会被工厂类调用。
+
+更多关于C++插件系统的设计和实现，参见“插件系统”一节。
 
 [build a plugin system](https://sourcey.com/articles/building-a-simple-cpp-cross-platform-plugin-system)
 
@@ -129,4 +163,4 @@ bool AutoRegister<T>::registered =
 
 **1.** 使用`typeid(object).name()`作为类型注册时的key需要注意什么问题？
 
-它的返回值是编译器实现相关的，标准没有规定返回的类型字符串的格式。在不同的可执行文件之间调用（跨二进制边界）时，会出现问题。
+它的返回值是编译器实现相关的，标准没有规定返回的类型字符串的格式。在不同的可执行文件之间调用（跨二进制边界）时，如果它们是由不同的编译器或参数编译的，可能会出现不一致的问题。
