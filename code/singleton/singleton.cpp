@@ -14,7 +14,7 @@ shared_ptr<Singleton> Singleton::get_instance() {
 }
 
 /*
-inline static Singleton& get_instance() {   
+Singleton& get_instance() {   
     static Singleton instance;
     return instance;
 }*/

@@ -39,7 +39,7 @@ shared_ptr<Singleton> Singleton::get_instance() {
 ## 利用局部静态变量
 
 ```cpp
-inline static Singleton& get_instance() {   
+Singleton& Singleton::get_instance() {   
     static Singleton instance;
     return instance;
 }
