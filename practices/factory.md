@@ -108,8 +108,6 @@ REGISTER_TYPE("Santana", [](){ new Santana(); });
 
 ```cpp
 // File: factory.cpp
-typedef Object* (*Ctor)();
-
 unordered_map<string, Ctor>& get_ctor_dict() {
     static unordered_map<string, Ctor> ctor_dict;
     return ctor_dict;
@@ -169,7 +167,7 @@ public:
 * 工厂类的类型注册函数`reg_create`，会被商品动态库调用。
 * 商品类的创建函数`Object* ();`，会被工厂类调用。
 
-但是，商品对象创建之后肯定还会存在调用它的其它接口的情况，这些函数调用同样存在问题。考虑到这些函数的时候，工厂模式事实上就成了一个**插件系统**。关于构建插件系统的问题和方案，会在专门的一节中讨论。
+但是，商品对象创建之后肯定还会存在调用它的其它接口的情况，这些函数调用同样存在问题。考虑到这些函数的时候，工厂模式就成了事实上的**插件系统**。关于构建插件系统的问题和方案，会在专门的一节中讨论。
 
 ## 练习
 
