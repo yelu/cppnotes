@@ -35,24 +35,22 @@ Object* Factory::create_object(string type_name) {
 
 ## 类型注册
 
-简单工厂模式就像它的名字，简单直接，非常易于理解，一眼就能望见所有实现细节，在一些轻量级的应用中，应该优优先考虑采用。
+简单工厂模式就像它的名字，简单直接，易于理解，一眼就能望见所有实现细节，在一些轻量级的应用中，应该优优先考虑采用。
 
-在简单工厂模式中，每增加一个新的“商品”种类，就需要添加新的分支判断逻辑，导致工厂类本身的源代码需要频繁被修改。对一个需要持续维护和扩展的框架来说，这确实不是个特别好的设计。为了缓解问题，需要某种更动态的类型注册机制。
+在简单工厂模式中，每增加一个新的“商品”种类，需要添加新的分支判断逻辑，导致工厂类的源代码需要频繁被修改。对一个需要持续维护和扩展的框架来说，这确实不是个特别好的设计。为了缓解问题，需要更加动态的类型注册机制。
 
-第一步，用一个字典保存类型字符串到构造函数的映射。实现上的一点要求是，对象的创建函数需要绑定到一个统一的签名上去，例如下面的`Object* (*Ctor)()`。
+第一步，用一个字典保存类型字符串到构造函数的映射。实现上的一点要求是，对象的创建函数需要绑定到一个统一的签名上去，例如下面的`Object* ()`。
 
 ```cpp
 // File: factory.cpp
-typedef Object* (*Ctor)();
+using Ctor = std::function<Object*()>;
 unordered_map<string, Ctor> ctor_dict;
 
-void reg_type(const string& type_name, Ctor ctor)
-{
+void reg_type(const string& type_name, Ctor ctor) {
     ctor_dict[type_name] = ctor;
 }
 
-Object* create(const string& type_name)
-{
+Object* create(const string& type_name) {
     const auto& ite = ctor_dict.find(type_name);
 
     if (ite != ctor_dict.end()) {
@@ -75,8 +73,7 @@ public:
 // File: santana.cpp
 #include "santana.h"
 
-struct AutoRegister
-{
+struct AutoRegister {
     AutoRegister(const string& type_name, Ctor ctor)
     {
         reg_type(type_name, ctor);
@@ -91,8 +88,7 @@ static AutoRegister auto_reg("Santana", [](){ new Santana(); });
 ```cpp
 // File: factory.h
 #define REGISTER_TYPE(type_name, ctor) \
-    struct AutoRegister \
-    { \
+    struct AutoRegister { \
         AutoRegister(const string& type_name, Ctor ctor) \
         { \
             reg_type(type_name, ctor); \
@@ -108,19 +104,32 @@ static AutoRegister auto_reg("Santana", [](){ new Santana(); });
 REGISTER_TYPE("Santana", [](){ new Santana(); });
 ```
 
-静态全局对象`auto_reg`初始化时会调用函数`reg_type`，该函数会访问另一个全局变量`ctor_dict`。编译器能否按照正确的顺序初始化这些有依赖关系的全局和静态变量，是这个方法面临的一个风险。
+全局变量的初始化顺序是该方法面临的一个风险。静态全局对象`auto_reg`初始化时会调用函数`reg_type`，该函数会访问另一个全局变量`ctor_dict`。跨编译单元的静态变量初始化顺序在标准中是未定义的，取决于编译器实现。虽然现在大多数编译器可能可以处理这种情况，更安全的做法是利用`Construct On First Use Idiom`将ctor_dict定义为局部静态变量并通过函数访问。
 
-现在，我们成功分离了工厂模式包含的两个部分：工厂管理类和商品类注册。在增加新的商品类时工厂类源代码能够保持不变，商品类的注册逻辑也分散在了每个商品类自身的源文件当中。
+```cpp
+// File: factory.cpp
+typedef Object* (*Ctor)();
 
-## 自动注册
+unordered_map<string, Ctor>& get_ctor_dict() {
+    static unordered_map<string, Ctor> ctor_dict;
+    return ctor_dict;
+}
+
+void reg_type(const string& type_name, Ctor ctor) {
+    get_ctor_dict()[type_name] = ctor;
+}
+```
+
+到这里，我们成功分离了工厂模式的两个关键部分：工厂管理类和商品类注册。在增加新的商品类时工厂类代码能够保持不变，商品类的注册逻辑也分散在了每个商品类自身的源文件当中。
+
+## 利用继承注册
 
 Bartek在一篇blog post里[[cache]](Bartek_Factory_With_Self_Registering_Types.html)[[link]](https://www.bfilipek.com/2018/02/factory-selfregister.html)提出了另一种更加自动的注册机制，这种机制优雅的地方在于它将注册动作隐藏在了一个基类当中，只要继承就可以自动被注册。这个方法背后涉及更多的技术细节，采用与否需要进行权衡。
 
 ```cpp
 // File: factory.h
 template<typename T>
-class AutoRegister
-{
+class AutoRegister {
   protected:
     static bool registered;
     virtual ~AutoRegister() {
@@ -158,9 +167,9 @@ public:
 目前，关于跨边界的函数调用，我们只涉及到了和注册、创建对象相关的两个函数。把它们导出为C APIs可以避免兼容性问题。
 
 * 工厂类的类型注册函数`reg_create`，会被商品动态库调用。
-* 商品类的创建函数`typedef Object* (*Ctor)();`，会被工厂类调用。
+* 商品类的创建函数`Object* ();`，会被工厂类调用。
 
-但是，商品对象创建之后肯定还会存在调用它的其它接口的情况，这些函数调用同样存在问题。实际上，这构成了一个事实上的**插件系统**。关于构建插件系统的问题和方案，会在专门的一节中讨论。
+但是，商品对象创建之后肯定还会存在调用它的其它接口的情况，这些函数调用同样存在问题。考虑到这些函数的时候，工厂模式事实上就成了一个**插件系统**。关于构建插件系统的问题和方案，会在专门的一节中讨论。
 
 ## 练习
 
