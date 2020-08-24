@@ -174,3 +174,7 @@ public:
 **1.** 使用`typeid(object).name()`作为类型注册时的key需要注意什么问题？
 
 它的返回值是编译器实现相关的，标准没有规定返回的类型字符串的格式。在不同的可执行文件之间调用（跨二进制边界）时，如果它们是由不同的编译器或参数编译的，可能会出现不一致的问题。
+
+## References
+
+**1.** Self Registering Classes - Taking polymorphism to the limit[[cache]](ACCU_Self_Registering_Classes.html)[[link]](https://accu.org/index.php/journals/597)
