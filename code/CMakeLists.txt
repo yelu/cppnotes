@@ -22,3 +22,5 @@ add_executable(socket_server_asio socket_server_asio.cpp)
 target_link_libraries(socket_server_asio PUBLIC ${CONAN_LIBS})
 
 add_executable(promise_future promise_future.cpp)
+
+add_executable(singleton singleton/singleton.h singleton/singleton.cpp)

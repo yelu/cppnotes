@@ -37,3 +37,4 @@ hello_world
 build/
 cmake-build*/
 CMakeFiles/
+Testing/

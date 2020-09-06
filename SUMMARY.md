@@ -35,8 +35,8 @@
 
 * [异常和错误处理](practices/exception.md)
 * [Scope Guard](practices/scope_guard.md)
-* [单例]()
-* [工厂](practices/factory.md)
+* [单例](practices/singleton.md)
+* [工厂](practices/factory/factory.md)
 * [插件系统*](practices/plugin_system.md)
 * [异步和协程](practices/async_and_coroutine/async_and_coroutine.md)
 * [异步IO](practices/async_io.md)
