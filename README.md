@@ -11,6 +11,7 @@
 
 * [源代码到可执行程序](compile_link/cpp_to_exe.md)
 * [内部和外部链接](compile_link/intern_static.md)
+* [目标文件](compile_link/elf.md)
 * [CMake基础](compile_link/cmake_cookbook.md)
 
 ## 设计和原理
