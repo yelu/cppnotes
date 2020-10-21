@@ -44,6 +44,12 @@ user@ubuntu: nm -C libtest_lto.so
 0000000000000660 r __FRAME_END__
 ```
 
+## Exercises
+
+**1.** Why can't I __declspec(dllexport) a function from a static library?
+
+[[link]](https://devblogs.microsoft.com/oldnewthing/20140321-00/?p=1433)[[cache]](why_cant_export_function_from_static_library.html)
+
 ## References
 
 * [Reduce Unused Code](https://tetzank.github.io/posts/removing-unused-code/)
