@@ -117,7 +117,7 @@ void reg_type(const string& type_name, Ctor ctor) {
 
 ## 利用继承注册
 
-Bartek在一篇blog post里[[cache]](Bartek_Factory_With_Self_Registering_Types.html)[[link]](https://www.bfilipek.com/2018/02/factory-selfregister.html)提出了另一种更加自动的注册机制，这种机制优雅的地方在于它将注册动作隐藏在了一个基类当中，只要继承就可以自动被注册。这个方法背后涉及更多的技术细节，采用与否需要进行权衡。
+Bartek在一篇blog post里[[cache]](Factory_With_Self_Registering_Types.html)[[link]](https://www.bfilipek.com/2018/02/factory-selfregister.html)提出了另一种更加自动的注册机制，这种机制优雅的地方在于它将注册动作隐藏在了一个基类当中，只要继承就可以自动被注册。这个方法背后涉及更多的技术细节，采用与否需要进行权衡。
 
 ```cpp
 // File: factory.h
@@ -173,3 +173,5 @@ public:
 ## References
 
 [1] Self Registering Classes - Taking polymorphism to the limit[[cache]](ACCU_Self_Registering_Classes.html)[[link]](https://accu.org/index.php/journals/597)
+
+[2] Static Variables Initialization in a Static Library [[cache]](Static_Variables_Initialization_in_Static_Library.html) [[link]](https://www.bfilipek.com/2018/02/static-vars-static-lib.html)
