@@ -1,5 +1,7 @@
 # 左值和右值
 
+Thomas Becker
+
 * [Introduction](http://thbecker.net/articles/rvalue_references/section_01.html)
 * [Move Semantics](http://thbecker.net/articles/rvalue_references/section_02.htmll)
 * [Rvalue References](http://thbecker.net/articles/rvalue_references/section_03.html)
@@ -11,3 +13,7 @@
 * [Rvalue References and Exceptions](http://thbecker.net/articles/rvalue_references/section_09.html)
 * [The Case of the Implicit Move](http://thbecker.net/articles/rvalue_references/section_10.html)
 * [Acknowledgments and Further Reading](http://thbecker.net/articles/rvalue_references/section_11.html)
+
+Microsoft
+
+* Rvalue Reference Declarator: && [[link]](https://docs.microsoft.com/en-us/cpp/cpp/rvalue-reference-declarator-amp-amp?view=msvc-160)[[cache]](Rvalue_Reference_Declarator.html)
