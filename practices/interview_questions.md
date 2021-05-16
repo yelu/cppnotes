@@ -274,4 +274,6 @@ public:
 
 ## CRT Runtime Linkage
 
+## [std::any: How, when, and why](std_any_how_when_and_why.html)
+
 ## [Additional FAQ](https://isocpp.org/faq)
