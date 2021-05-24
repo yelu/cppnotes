@@ -25,7 +25,6 @@
 * [继承](internals/inheritance.md)
 * [多态](internals/polymorphism.md)
 * [左值和右值*](internals/lvalue_rvalue.md)
-* [模板*](internals/template.md)
 
 ## 内存管理
 
@@ -47,3 +46,11 @@
 * [性能优化]()
 * [Spin Lock*](practices/spin_lock.md)
 * [答面试官](practices/interview_questions.md)
+
+## 模板
+
+* [Metaprogramming](template/metaprogramming.md)
+* [Type Tratis](template/type_traits.md)
+* [Policies](template/policies.md)
+* [Variadic Template](template/variadic_template.md)
+* [SFINAE and enable_if](template/SFINAE.md)

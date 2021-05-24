@@ -194,7 +194,11 @@ int main()
 
 ## 回顾
 
-最后，在了解了一些编程范式的知识之后，回顾一些重要的事实：
+在了解了一些编程范式的知识之后，我们回顾一些要点：
 
 * 编程语言的背后有一定的理论体系，每门语言都涵盖了一种或者多种编程范式。
 * 灵活运用编程范式背后的思想才是最重要的。
+
+## References
+
+* [Programming Language Principles and Paradigms](https://eecs490.github.io/notes/index.html)
