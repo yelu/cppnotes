@@ -1,6 +1,9 @@
 # Type Traits
 
-Type Traits是模板编程的重要技术之一，它完全工作在编译时，以模板类的形式存在，主要提供两类操作。
+Type Traits是模板编程的重要技术之一，完全工作在编译时，以模板类的形式存在，主要提供两大类操作：
+
+* 查询类型T的属性
+* 基于类型T变换出新类型
 
 ## Type Traits
 
@@ -20,43 +23,61 @@ false
 */
 ```
 
-这些模板类有什么用处呢？答案是让编译器根据不同的数据类型选择不同的代码路径。例如，我们有一个函数`algorithm`封装了某种算法，当数据类型分别为`int`和`float`时候需要两种完全不同的实现版本，可是对外我们想提供统一的模板类，将类型的选择和切换封装在内部。这就是Type Traits发挥作用的时候。
+这些模板类有什么用处呢？答案是让编译器根据不同的数据类型选择不同的代码路径，称为Tag Dispatching。
 
-抛开标准库已经内置的常见Type Traits不用，自己实现满足以上要求的Type Traits也并不复杂。
+例如，我们有一个函数`algorithm`封装了某种算法，当数据类型分别为`int`和`float`时候需要两种完全不同的实现版本，可是对外我们想提供名字统一的算法，将类型的选择和切换封装在内部。这就是Type Traits发挥作用的时候。抛开标准库已经内置的常见Type Traits，自己实现满足以上要求的Type Traits也并不复杂。
 
-首先，我们需要定义两个辅助类型，帮助`int_or_float`这个Type Traits区分不同的类型。
+首先，我们需要定义两个辅助类型，帮助`int_or_float`这个Type Traits针对不同的类型做分发。
 
 ```cpp
-struct IntFlag {};
-struct FloatFlag {};
+struct IntTag {};
+struct FloatTag {};
 
 template<typename T>
-struct int_or_float {
-   typedef FloatFlag type;
+struct is_int {
+   typedef FloatTag type;
 };
 
 template<>
-struct int_or_float<int> {
-   typedef IntFlag type;
+struct is_int<int> {
+   typedef IntTag type;
 };
 ```
 
-然后，我们通过模板和重载实现代码路径的选择。上面定义的辅助类型`IntFlag`和`FloatFlag`将作为函数的额外模板参数，以区分不同版本的函数。
+然后，我们通过函数的参数类型重载实现代码路径的选择。上面定义的辅助类型`IntTag`和`FloatTag`将作为函数的额外参数，以区分不同版本的函数。
 
 ```cpp
 template<typename T>
-void algorithm(T num, IntFlag)   { /*...*/ } 
+void algorithm_impl(T num, IntTag)   { /*...*/ } 
 
 template<typename T>
-void algorithm(T num, FloatFlag) { /*...*/ } 
+void algorithm_impl(T num, FloatTag) { /*...*/ } 
 
 template<typename T>
 void algorithm(T num) {
-   algorithm(num, int_or_float<T>::type())
+   algorithm_impl(num, is_int<T>::type())
 } 
 ```
 
-可以看到，Type Traits是我们实现编译时代码分发(dispatcher)功能的核心技术。
+C++ 17种引入的编译时条件判断（compile-time if），进一步满足了根据类型做代码分发的这类需求。
+
+```cpp
+template<typename T>
+struct is_int {
+   static constexpr bool value = false;
+};
+
+template<>
+struct is_int<int> {
+   static constexpr bool value = true;
+};
+
+template <typename T>
+int algorithm(T t) {
+     if constexpr (is_int<T>::value) { ... }
+     else { ... }
+}
+```
 
 ## Type Transformations
 
