@@ -238,6 +238,20 @@ If your header files but not your source files include the headers of another li
 
 Build properties of PUBLIC and INTERFACE dependencies are propagated to consuming libraries.
 
+## 设置rpath(Linux)
+
+The run-time search path (rpath) defines paths to search for dynamic libraries when executing a program. It is a mechanism on Linux parallel to the LD_LIBRARY_PATH environment variable, which is another hint to find dynamic libraries.
+
+Usually, it is a good idea to make software which you built relocatable. This means that created binaries can be moved around and they still work after the location change. This includes the ability to still find the correct versions of dynamic libraries. One simple way to achieve this is by setting the rpath relative to the current location of the binary. In CMake this can be achieved like this:
+
+```cmake
+# for all binaries created in a CMake project:
+SET(CMAKE_INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/")
+# for certain targets
+SET_TARGET_PROPERTIES(target 1 target2 ...
+    PROPERTIES INSTALL_RPATH "$ORIGIN/../lib:$ORIGIN/")
+```
+
 ## 练习
 
 **1.** 使用Make分别编译Debug和Release版本。
