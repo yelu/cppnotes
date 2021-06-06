@@ -110,7 +110,7 @@ private:
 
 虚继承带来的问题是继承链条上的每个类型的内存排布都可能不同。也就是说，Bottom中Top的偏移位置和Left或Right中Top的偏移位置并不一样，给调用不同类型的接口函数时计算this指针的偏移带来了困难。
 
-编译器为了解决该问题，引入了[Virtual Table](MemoryLayoutMultipleInheritance.pdf)，用来定位每个虚基类距离起始位置的偏移量，通常这个字段被命名为`Virtual Base Offset`。虚继承是激活编译产生Virtual Table的场景之一，另一个场景是类中定义了虚函数，这是下一节的主题。
+编译器为了解决该问题，引入了[Virtual Table](ref/MemoryLayoutMultipleInheritance.pdf)，用来定位每个虚基类距离起始位置的偏移量，通常这个字段被命名为`Virtual Base Offset`。虚继承是激活编译产生Virtual Table的场景之一，另一个场景是类中定义了虚函数，这是下一节的主题。
 
 clang打印的类内存布局如下，由于对齐的原因，Bottom中存在一些Padding。
 
