@@ -55,5 +55,5 @@ std::enable_if其实和Type Traits的应用场景是高度重合的，可以回�
 
 ## References
 
-* SFINAE and enable_if [[link]](https://eli.thegreenplace.net/2014/sfinae-and-enable_if/)[[cache]](SFINAE_and_enable_if.html)
-* Notes on C++ SFINAE, Modern C++ and C++20 Concepts [[link]](https://www.bfilipek.com/2016/02/notes-on-c-sfinae.html)[[cache]](notes_on_c_SFINAE.html)
+* [SFINAE and enable_if](https://eli.thegreenplace.net/2014/sfinae-and-enable_if/) [[cache]](ref/SFINAE_and_enable_if.html)
+* [Notes on C++ SFINAE, Modern C++ and C++20 Concepts](https://www.bfilipek.com/2016/02/notes-on-c-sfinae.html) [[cache]](ref/notes_on_c_SFINAE.html)

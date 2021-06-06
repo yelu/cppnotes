@@ -172,6 +172,5 @@ public:
 
 ## References
 
-[1] Self Registering Classes - Taking polymorphism to the limit[[cache]](ACCU_Self_Registering_Classes.html)[[link]](https://accu.org/index.php/journals/597)
-
-[2] Static Variables Initialization in a Static Library [[cache]](Static_Variables_Initialization_in_Static_Library.html) [[link]](https://www.bfilipek.com/2018/02/static-vars-static-lib.html)
+* [Self Registering Classes - Taking polymorphism to the limit](https://accu.org/index.php/journals/597) [[cache]](ACCU_Self_Registering_Classes.html)
+* [Static Variables Initialization in a Static Library](https://www.bfilipek.com/2018/02/static-vars-static-lib.html) [[cache]](Static_Variables_Initialization_in_Static_Library.html)

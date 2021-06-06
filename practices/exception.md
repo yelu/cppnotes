@@ -48,7 +48,7 @@ int process() {
 
 综合整个函数掉栈来看，错误码的传递和检查的繁琐问题更加明显。调用链上游函数要对下游每个函数的每个错误负责，任何疏忽都将导致错误对上永久被“压制”。
 
-![error code passing](error_code_passing.png)
+![error code passing](pic/error_code_passing.png)
 
 除了已经检查的错误，仍然有两处可能发生错误的地方（概率较低）没有检查，很多现实中运行很好的代码都会忽略这两种情况下的错误处理。这表明，我们有时候不惜冒险以回避繁琐的错误码检查。
 * [operator new](https://en.cppreference.com/w/cpp/memory/new/operator_new)可能因为内存不足返回空指针。
@@ -104,7 +104,7 @@ void RAII() {
 
 从这一点上来说，异常收获的好处是，大量“异常中立”的代码可以不必显示处理异常，同时也不会掩盖或压制可能发生的错误。
 
-![code path](code_path.png)
+![code path](pic/code_path.png)
 
 ## 错误处理的不同方案
 

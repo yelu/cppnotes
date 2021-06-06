@@ -32,4 +32,4 @@ Also, regarding your note about C++ name mangling: The ABI can define a "standar
 ## References
 
 * [什么是ABI](https://stackoverflow.com/questions/2171177/what-is-an-application-binary-interface-abi)
-* [DSO How TO](dsohowto.pdf)
+* [DSO How TO](ref/dsohowto.pdf)

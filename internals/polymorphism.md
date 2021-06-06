@@ -66,7 +66,7 @@ $ clang -cc1 -fdump-record-layouts obj_model_poly.cpp
            |  nvsize=32, nvalign=8]
 ```
 
-![Polymorphism and Memory Layout](polymorphism.png)
+![Polymorphism and Memory Layout](pic/polymorphism.png)
 
 在把派生类指针赋给基类指针时，编译器会安插代码进行偏移量调整，使基类指针指向正确的基类子对象起始位置，这一步是在编译时发生的。例如，当基类指针`Left* left`被派生类指针`new Bottom()`赋值时，`left`指针无需被调整(偏移量为0)，而`right=new Bottom()`被初始化时，会被加上一个16字节的偏移量。
 

@@ -16,4 +16,4 @@ Thomas Becker
 
 Microsoft
 
-* Rvalue Reference Declarator: && [[link]](https://docs.microsoft.com/en-us/cpp/cpp/rvalue-reference-declarator-amp-amp?view=msvc-160)[[cache]](Rvalue_Reference_Declarator.html)
+* [Rvalue Reference Declarator](https://docs.microsoft.com/en-us/cpp/cpp/rvalue-reference-declarator-amp-amp?view=msvc-160) [[cache]](ref/Rvalue_Reference_Declarator.html)

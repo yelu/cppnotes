@@ -158,7 +158,7 @@ $ clang -cc1 -fdump-record-layouts obj_model_inherit.cpp
 
 如果Left是一个独立的对象，访问基类Top的成员时，this指针需要偏移12字节(8字节vptr+4字节int y)。而如果Left是从Bottom类型的对象中得来的Sub-Object，访问Top类型成员时，this指针则需要偏移32个字节。
 
-![Virtual Inheritance and Memory Layout](inheritance.png)
+![Virtual Inheritance and Memory Layout](pic/inheritance.png)
 
 C++是为数不多有勇气支持多继承的语言。如果让C++再选一次，多继承要不要加进标准恐怕是值得商榷的。多继承带来了开销和太多额外复杂性，以至于盖过了它所带来的收益。更为明智的选择是通过合理调整继承结构，避免多继承的出现。Java/C#等后来语言也都选择不支持多继承，转而代以接口(Interface)这个概念。
 

@@ -116,11 +116,17 @@ std::pmr::monotonic_buffer_resource pool{std::data(buffer), std::size(buffer)};
 std::pmr::vector<std::pmr::string> vec{ &pool };
 ```
 
+## 内存碎片
+
+内存碎片指的是，一些内存片段虽然没有被分配出去，但是却无法再被分配出去的现象。碎片问题是伴随着内存申请出现的，很难被完全避免。
+
+内存碎片问题发展到极端，可能会出现一种现象：虽然空闲内存的总量满足申请要求，却找不到任何一个连续的片段满足申请要求，导致内存申请失败。这种极端现象不是由一两次内存申请和释放导致的，而是随时间慢慢积累而来的，正由于此，碎片问题不容易被简单的测试所发现。但是，在长时间不停机的在线服务中，问题的暴露是必然的，只是时间问题。为了应对问题，这些程序在设计和实现的时候就要考虑碎片问题，也必须通过长时间的压力测试来观察内存的使用情况。对于一些事后发现问题但是已经在运行的服务，也有一些公司采用了投机取巧的办法，例如定期重启服务，在最坏的情况到来之前重新开始。
+
 ## 常见内存分配器实现
 
 https://github.com/mtrebi/memory-allocators/blob/master/README.md
 
-## Arena Allocator
+### Arena Allocator
 
 预先分配一大块内存（arena），然后从这块内存的起始位置，依次线性往后分配内存，构造我们需要的对象。过程中只需要记录已分配内存和未分配内存的分界点。
 
@@ -128,6 +134,17 @@ https://github.com/mtrebi/memory-allocators/blob/master/README.md
 
 高并发的无状态网络服务通常都适用采用arena策略的分配器。可以为每个服务线程预先分配一个arena allocator，请求处理过程中直接在该allocator上线性往后分配内存，直到结果发送完成。在接收到下一个请求时，直接跳到同一个allocator的头部重新开始分配内存。这样既不需要任何内存释放操作，也没有任何并发处理开销。
 
-## Stack Buffer
+### Stack Buffer
 
 Boost/container/small_vector
+
+### tcmalloc
+
+tcmalloc的全称是Thread Caching Malloc，名字已经表明了它的重要设计：为每个线程单独维护内存的cache，在并发情况下，减少内存管理过程中加锁带来的同步开销。
+
+tcmalloc随着gpertools在2005年开源，随后很多公司的高并发在线服务均开始使用它替代系统的内存管理函数。这里就出现了一个疑问：既然tcmalloc那么好，为什么glibc中自带的malloc/free不直接采用tcmalloc呢？这个问题可以从另一个角度来理解。第三方内存分配器的策略多是针对一些场景特化的，既然没有一个在任何时候都绝对优势的实现，默认的malloc/free就选择不作为，简单直白地在系统和应用间做中介，将内存管理问题留给应用本身或其它第三方库去解决。
+
+## References
+
+* [TCMalloc解密](https://wallenwang.com/2018/11/tcmalloc/) [[cache]](ref/TCMalloc_Wallen_Blog.html)
+* [TCMalloc分析 - 如何减少内存碎片](https://zhuanlan.zhihu.com/p/29415507) [[cache]](ref/TCMalloc_memory_fragementation.html)

@@ -22,7 +22,7 @@ g++ -c hello_world.cpp
 cl /EHsc hello_world.cpp
 ```
 
-![Compile and Link](compile_link.png)
+![Compile and Link](pic/compile_link.png)
 
 关于理解这一过程的重要性，《Computer System: A Programmer's Perspective》在开头“计算机系统漫游”阶段就指出来了，随后又在“链接”一章详细解释了程序链接和运行的各个细节。
 
@@ -104,7 +104,7 @@ int main(int argc, char* argv[]) {
 
 ## 编译(Compile)
 
-接下来，编译器cc1plus将中间文件`hello_world.ii`编译成汇编代码[hello_world.s](hello_world.s)。这一步是真正的C++词法、语法分析发生的地方。
+接下来，编译器cc1plus将中间文件`hello_world.ii`编译成汇编代码[hello_world.s](code/hello_world.s)。这一步是真正的C++词法、语法分析发生的地方。
 
 ```bash
 /usr/lib/gcc/x86_64-linux-gnu/7/cc1plus hello_world.ii -Og -o hello_world.s
@@ -157,4 +157,7 @@ g++ -v -o hello_world hello_world.o
 
 **2.** 阅读 Chapter 1 and Chapter 7 of book "Computer Systems A Programmer’s Perspective".
 
-**3.** 阅读[the inside story on shared libraries and dynamic loading](the_inside_story_on_shared_libraries_and_dynamic_loading.pdf).
+## References
+
+* [The inside story on shared libraries and dynamic loading](ref/the_inside_story_on_shared_libraries_and_dynamic_loading.pdf)
+* [Why can't I __declspec(dllexport) a function from a static library](https://devblogs.microsoft.com/oldnewthing/20140321-00/?p=1433) [[cache]](ref/why_cant_export_function_from_static_library.html)

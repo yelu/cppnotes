@@ -107,7 +107,7 @@ std::transform(s.begin(), s.end(),
 * 命令式（Imperative），过程式和面向对象都属于此类。
 * 声明式（Declarative），函数式属于此类。
 
-![编程范式分类](paradigms.png)
+![编程范式分类](pic/paradigms.png)
 
 命令式是很常见的编程方式，程序的状态（即数据）随着代码一行行执行被改变，代码定义了怎样（How）做某件事情的全部操作步骤。
 
