@@ -4,10 +4,10 @@
 
 ## 导论
 
-* [C++复杂论](basic/why_difficult.md)
-* [C++无用论](basic/why_cpp.md)
-* [编程范式](basic/paradigm.md)
-* [指针](basic/pointer.md)
+* [C++复杂论](basics/why_difficult.md)
+* [C++无用论](basics/why_cpp.md)
+* [编程范式](basics/paradigm.md)
+* [指针](basics/pointer.md)
 
 ## 编译和链接
 
