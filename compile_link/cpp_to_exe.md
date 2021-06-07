@@ -151,6 +151,52 @@ g++ -v -o hello_world hello_world.o
 /usr/bin/ld: hello_world.o: undefined reference to symbol 'printf@@GLIBC_2.2.5'
 ```
 
+## 优化可执行文件大小
+
+gcc的`-flto`开关会在链接时刻分析未被使用的符号，在目标文件中删除它们。在以下代码中，`square_add`是需要导出的函数，它调用了`add`，LTO优化应该保留`add`和`square_add`，移除`mul`。
+
+```cpp
+// File: test_lto.cpp
+
+__attribute__ ((noinline)) int mul(int m, int n);
+__attribute__ ((noinline)) int add(int m, int n);
+__attribute__((visibility("default"))) int square_add(int m, int n);
+
+
+int mul(int m, int n) {
+    int res = m*n;
+    return res;
+}
+
+int add(int m, int n) {
+    int res = m + n;
+    return res;
+}
+
+int square_add(int m, int n) {
+    int res = add(m*m, n*n);
+    return res;
+}
+```
+
+这以上优化对静态库不起作用。原因是，静态库的作用就是被其它目标链接，裁剪其中的代码通常不是我们的意图。
+
+动态库没有main函数，默认情况下，所有函数、变量和类符号都会被导出。这一行为可以通过显式地指定要导出的符号来改变，未指定被导出的符号，只要没有被指定导出的符号用到，就会被链接器删除。
+
+对于可执行文件，显式的入口是main函数，只要没有被main函数使用到的符号都会被删除。
+
+```bash
+user@ubuntu: g++ -O2 -flto -fvisibility=hidden test_lto.cpp -shared -o libtest_lto.so
+user@ubuntu: nm -C libtest_lto.so
+0000000000200e90 d _DYNAMIC
+0000000000201000 d _GLOBAL_OFFSET_TABLE_
+                 w _ITM_deregisterTMCloneTable
+                 w _ITM_registerTMCloneTable
+00000000000005a0 T square_add(int, int)
+0000000000000590 t add(int, int)
+0000000000000660 r __FRAME_END__
+```
+
 ## 练习
 
 **1.** 如何导出一个定义在动态链接库中的类供外部使用？你的方式在不同编译器和平台之间兼容性如何？
