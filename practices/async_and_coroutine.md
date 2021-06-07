@@ -158,7 +158,7 @@ Linus的一封邮件[Linux-Kernel Archive: Re: proc fs and shared pids](ref/fs_a
 
 实现异步机制通常需要用到多线程，并在线程间传递数据。Promise和Future是实现数据传递的常见模式之一，C++标准库对此提供了[支持](https://en.cppreference.com/w/cpp/thread/future)。
 
-![Promise and Future](../pic/promise_and_future.jfif)
+![Promise and Future](pic/promise_and_future.jfif)
 
 每个`Promise<T>`对象总是关联一个`Future<T>`对象。Promise“承诺”未来某个时候产出一个T类型的数据，通过与之关联的`Future<T>`对象可以在“未来”某个时候获取该数据。Promise和Future之间的关系类似生产者和消费者。
 
