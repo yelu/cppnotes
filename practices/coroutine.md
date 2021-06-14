@@ -26,7 +26,7 @@ for(;;) {
 }
 ```
 
-![Async Tasks](../pic/async_task.png)
+![Async Tasks](pic/async_task.png)
 
 常见的耗时任务分为两类：CPU密集型(CPU-bound)和IO密集型(IO-bound)。在对系统资源的有效利用方面，二者有所不同，导致异步的底层实现方式也需要有所区别。对于CPU-bound任务，线程池模型是合适的。而对于IO-bound的任务，将IO操作放进单独的Worker线程，功能上没有问题，但这仅仅是将等待的工作从调用方线程转移到了另一个线程中去，资源利用率方面没有改进。IO-bound的任务是由于磁盘和网络等设备相对CPU过慢，让CPU等待是浪费资源，不如让这些设备在数据就绪时主动通知CPU，CPU在这段时间内可以用于执行其它运算。IO操作作为异步任务的代表，在很多工具库或者文章里面，提到异步甚至指的就是异步IO。为了不打断本节的连贯性，异步IO将在下一节单独介绍。
 
@@ -195,3 +195,9 @@ int main() {
 ## 附IV 异步和智能指针
 
 异步通常意味着不止一条执行路径，它们之间共享数据的ownership是很难确定的，谁都不能是owner，于是只能靠share_ptr。因此，异步callback和智能指针这两个东西，看起来不搭边，但是是相辅相成的。
+
+## References
+
+* [Asynchronous programming overview](ref/Asynchronous-programming-overview.html) [[link]](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/)
+* [Asynchronous programming scenarios](ref/Asynchronous-programming-scenarios.html) [[link]](https://docs.microsoft.com/en-us/dotnet/csharp/async)
+* [Asynchronous Programming The Task Model](ref/Asynchronous-Programming-The-Task-model.html) [[link]](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/task-asynchronous-programming-model)
