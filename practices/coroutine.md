@@ -198,6 +198,7 @@ int main() {
 
 ## References
 
+* [风格之争：Coroutine模型 vs 非阻塞 异步IO(callback)](ref/风格之争-Coroutine模型-vs-callback.md)
 * [Asynchronous programming overview](ref/Asynchronous-programming-overview.html) [[link]](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/)
 * [Asynchronous programming scenarios](ref/Asynchronous-programming-scenarios.html) [[link]](https://docs.microsoft.com/en-us/dotnet/csharp/async)
 * [Asynchronous Programming The Task Model](ref/Asynchronous-Programming-The-Task-model.html) [[link]](https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/concepts/async/task-asynchronous-programming-model)

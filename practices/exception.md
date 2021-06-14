@@ -170,3 +170,7 @@ char* p = new (std::nothrow) char [UINT64_MAX]`
 **2.** C语言有异常支持吗？通常怎么处理错误？
 
 **3.** 实现一个二分查找程序，在目标值不存在时，分别用抛出异常和返回错误码来通知错误。测试二者的性能差距。
+
+## References
+
+* [Exception Handling Considered Harmful](http://www.lighterra.com/papers/exceptionsharmful/) [[cache]](ref/Exception-Handling-Considered-Harmful.html)
