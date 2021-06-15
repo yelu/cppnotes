@@ -65,3 +65,8 @@ int len = count(toekns);
 作为应用层开发者，很遗憾，C/C++是我们离底层硬件最近的选择。掌握C/C++的过程是我们理解普遍存在的分层和性能之间矛盾的过程，也是我们习得一门武器，在必要的时候去解决性能问题的过程。
 
 ![Developers Today](pic/developers.jpg)
+
+
+## References
+
+* [从GPU谈异构7: 分层和性能](https://zhuanlan.zhihu.com/p/380503615) [[cache]](ref/从GPU谈异构7.html)
