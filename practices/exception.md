@@ -173,4 +173,5 @@ char* p = new (std::nothrow) char [UINT64_MAX]`
 
 ## References
 
+* [CppCon 2018: Andrei Alexandrescu “Expect the expected”](ref/Andrei_Alexandrescu_Expect_the_expected_slides.pdf)
 * [Exception Handling Considered Harmful](http://www.lighterra.com/papers/exceptionsharmful/) [[cache]](ref/Exception-Handling-Considered-Harmful.html)
