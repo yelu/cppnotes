@@ -36,7 +36,6 @@ Conditonal Variable用于线程间状态的同步。等待线程B等待另一个
             data_ready = true;
         }
         std::cout << "Data prepared" << std::endl;
-        // you could also notify before the lock is released
         cond_var.notify_one();                          // (3)
     }
 
