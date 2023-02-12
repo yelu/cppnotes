@@ -38,3 +38,5 @@ build/
 cmake-build*/
 CMakeFiles/
 Testing/
+
+_build/
